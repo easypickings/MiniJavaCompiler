@@ -7,7 +7,7 @@
  * @FilePath     : \Compiler\minijava\symbol\MUndef.java
  */
 
-package symbol;
+package minijava.symbol;
 
 /**
  * Class for undefined types

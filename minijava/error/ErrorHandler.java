@@ -2,15 +2,15 @@
  * @Author       : Can Su
  * @Date         : 2020-03-05 14:03:12
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-06 23:37:31
+ * @LastEditTime : 2020-03-07 15:00:48
  * @Description  : Class to handle errors
  * @FilePath     : \Compiler\minijava\error\ErrorHandler.java
  */
 
-package error;
+package minijava.error;
 
+import minijava.symbol.*;
 import java.util.*;
-import symbol.*;
 
 /**
  * Class to handle errors

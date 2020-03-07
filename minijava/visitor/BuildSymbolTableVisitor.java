@@ -2,16 +2,16 @@
  * @Author       : Can Su
  * @Date         : 2020-03-05 14:49:46
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-07 11:22:24
+ * @LastEditTime : 2020-03-07 17:05:30
  * @Description  : Build-symbol-table visitor
  * @FilePath     : \Compiler\minijava\visitor\BuildSymbolTableVisitor.java
  */
 
-package visitor;
+package minijava.visitor;
 
-import error.*;
-import symbol.*;
-import syntaxtree.*;
+import minijava.error.*;
+import minijava.symbol.*;
+import minijava.syntaxtree.*;
 import java.util.*;
 
 /**
@@ -23,10 +23,10 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
    //
    public MSymbol visit(NodeList n, MSymbol argu) {
       MSymbol _ret=null;
-      int _count=0;
+      // int _count=0;
       for ( Enumeration<Node> e = n.elements(); e.hasMoreElements(); ) {
          e.nextElement().accept(this,argu);
-         _count++;
+         // _count++;
       }
       return _ret;
    }
@@ -34,10 +34,10 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
    public MSymbol visit(NodeListOptional n, MSymbol argu) {
       if ( n.present() ) {
          MSymbol _ret=null;
-         int _count=0;
+         // int _count=0;
          for ( Enumeration<Node> e = n.elements(); e.hasMoreElements(); ) {
             e.nextElement().accept(this,argu);
-            _count++;
+            // _count++;
          }
          return _ret;
       }
@@ -54,10 +54,10 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
 
    public MSymbol visit(NodeSequence n, MSymbol argu) {
       MSymbol _ret=null;
-      int _count=0;
+      // int _count=0;
       for ( Enumeration<Node> e = n.elements(); e.hasMoreElements(); ) {
          e.nextElement().accept(this,argu);
-         _count++;
+         // _count++;
       }
       return _ret;
    }

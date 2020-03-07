@@ -7,7 +7,7 @@
  * @FilePath     : \Compiler\minijava\symbol\MSymbol.java
  */
 
-package symbol;
+package minijava.symbol;
 
 /**
  * Entrance for all classes in symbol

@@ -7,7 +7,7 @@
  * @FilePath     : \Compiler\minijava\symbol\MInt.java
  */
 
-package symbol;
+package minijava.symbol;
 
 /**
  * Class for int type

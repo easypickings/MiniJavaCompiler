@@ -7,7 +7,7 @@
  * @FilePath     : \Compiler\minijava\symbol\MType.java
  */
 
-package symbol;
+package minijava.symbol;
 
 /**
  * Abstract class for types

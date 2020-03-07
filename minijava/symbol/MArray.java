@@ -7,7 +7,7 @@
  * @FilePath     : \Compiler\minijava\symbol\MArray.java
  */
 
-package symbol;
+package minijava.symbol;
 
 /**
  * Class for array type

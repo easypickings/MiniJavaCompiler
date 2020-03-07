@@ -2,12 +2,12 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 17:12:16
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-07 12:09:34
+ * @LastEditTime : 2020-03-07 15:02:06
  * @Description  : Class for variables
  * @FilePath     : \Compiler\minijava\symbol\MVar.java
  */
 
-package symbol;
+package minijava.symbol;
 
 /**
  * Class for variables

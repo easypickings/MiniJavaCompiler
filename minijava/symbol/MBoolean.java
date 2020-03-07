@@ -7,7 +7,7 @@
  * @FilePath     : \Compiler\minijava\symbol\MBoolean.java
  */
 
-package symbol;
+package minijava.symbol;
 
 /**
  * Class for boolean type

@@ -7,7 +7,7 @@
  * @FilePath     : \Compiler\minijava\symbol\MTypeList.java
  */
 
-package symbol;
+package minijava.symbol;
 
 import java.util.*;
 
