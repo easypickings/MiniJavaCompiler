@@ -1,3 +1,12 @@
+
+/*
+ * @Author       : Can Su
+ * @Date         : 2020-03-04 10:40:01
+ * @LastEditors  : Can Su
+ * @LastEditTime : 2020-03-07 12:17:25
+ * @Description  : 
+ * @FilePath     : \Compiler\minijava\Main.java
+ */
 import java.io.*;
 import visitor.*;
 import syntaxtree.*;
@@ -12,7 +21,9 @@ public class Main {
 
 			MSymbol typeList = new MTypeList();
 			root.accept(new BuildSymbolTableVisitor(), typeList);
-			ErrorHandler.PrintSymbolTable();
+			// ErrorHandler.PrintSymbolTable();
+			root.accept(new TypeCheckVisitor(), typeList);
+			ErrorHandler.PrintAll();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		} catch (TokenMgrError e) {

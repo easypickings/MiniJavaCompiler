@@ -2,7 +2,7 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 15:24:54
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-05 17:43:26
+ * @LastEditTime : 2020-03-07 11:31:41
  * @Description  : Class for array type
  * @FilePath     : \Compiler\minijava\symbol\MArray.java
  */
@@ -18,24 +18,16 @@ public class MArray extends MType {
         name = "int[]";
     }
 
-    public MArray(int _row, int _col) {
-        super(_row, _col);
-        name = "int[]";
-    }
-
     /**
      * Check if a given MType instance matches this (can assign to this)
      * 
-     * @param type    instance of MType
-     * @param verbose verbose mode on true
-     * @return: true on match, false otherwise
+     * @param type instance of MType
+     * @return null on success, error message on fail
      */
-    public boolean CheckType(MType type, boolean verbose) {
+    public String CheckType(MType type) {
         if (type instanceof MArray)
-            return true;
-
-        if (verbose)
-            ; // Handle error
-        return false;
+            return null;
+        return "\33[31mType mismatch: cannot convert from \33[33;4m" + type.name
+                + "\33[0m\33[31m to \33[33;4mint[]\33[0m";
     }
 }

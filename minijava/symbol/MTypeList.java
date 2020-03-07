@@ -2,7 +2,7 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 16:09:12
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-05 21:03:09
+ * @LastEditTime : 2020-03-06 20:09:04
  * @Description  : Container of all MType instances
  * @FilePath     : \Compiler\minijava\symbol\MTypeList.java
  */
@@ -31,13 +31,13 @@ public class MTypeList extends MSymbol {
      * Add a user-declared class to Classes
      * 
      * @param type instance of MClass
-     * @return: true on success, false on fail
+     * @return null on success, error message on fail
      */
-    public static boolean AddClass(MClass type) {
+    public static String AddClass(MClass type) {
         if (Classes.containsKey(type.name))
-            return false;
+            return "\33[31mClass \33[33;4m" + type.name + "\33[0m\33[31m duplicate declaration\33[0m";
         Classes.put(type.name, type);
-        return true;
+        return null;
     }
 
     public static MType getType(String type) {
@@ -52,9 +52,20 @@ public class MTypeList extends MSymbol {
                 if (Classes.containsKey(type))
                     return Classes.get(type);
                 else
-                    return null; // or return Undef?
+                    return Undef;
         }
 
+    }
+
+    /**
+     * Check whether a type is defined
+     * @param type name of a type
+     * @return null on defined, error message on undefined
+     */
+    public static String CheckDef(String type) {
+        if (getType(type) == Undef)
+            return "\33[31mType \33[33;4m" + type + "\33[0m\33[31m undefined\33[0m";
+        return null;
     }
 
     public static MType Array() {
@@ -67,6 +78,10 @@ public class MTypeList extends MSymbol {
 
     public static MType Int() {
         return Int;
+    }
+
+    public static MType Undef() {
+        return Undef;
     }
 
     public static HashMap<String, MType> Classes() {

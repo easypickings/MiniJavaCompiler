@@ -2,7 +2,7 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 17:12:16
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-05 21:41:02
+ * @LastEditTime : 2020-03-07 12:09:34
  * @Description  : Class for variables
  * @FilePath     : \Compiler\minijava\symbol\MVar.java
  */
@@ -23,9 +23,9 @@ public class MVar extends MSymbol {
     protected MSymbol owner;
 
     /** for temporary (anonymous) variable */
-    public MVar(String _type, int _row, int _col) {
+    public MVar(String _name, String _type, int _row, int _col) {
         super(_row, _col);
-        name = null;
+        name = _name;
         type = _type;
         owner = null;
     }
@@ -33,9 +33,9 @@ public class MVar extends MSymbol {
     public MVar(String _name, String _type, MSymbol _owner, int _row, int _col) {
         super(_name, _row, _col);
         type = _type;
-        /** check owner's legitimacy */
+        /** check owner's legality */
         if (!(_owner instanceof MClass || _owner instanceof MMethod)) {
-            System.out.println("FATAL: instance of Mvar is constructed with illegal param 'owner'. Exiting...");
+            System.err.println("FATAL: instance of Mvar is constructed with illegal param \"owner\". Exiting...");
             System.exit(-1);
         }
         owner = _owner;
@@ -54,6 +54,6 @@ public class MVar extends MSymbol {
     }
 
     public void Print(String indent) {
-        System.out.print(indent + "\33[33;4m" + type + " \33[32;4m" + name + "\33[0m");
+        System.out.print(indent + "\33[33;4m" + type + "\33[0m \33[32;4m" + name + "\33[0m");
     }
 }

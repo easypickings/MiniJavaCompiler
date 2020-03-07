@@ -2,9 +2,9 @@
  * @Author       : Can Su
  * @Date         : 2020-03-05 14:49:46
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-07 11:22:24
- * @Description  : Build-symbol-table visitor
- * @FilePath     : \Compiler\minijava\visitor\BuildSymbolTableVisitor.java
+ * @LastEditTime : 2020-03-07 12:43:26
+ * @Description  : Type-check visitor
+ * @FilePath     : \Compiler\minijava\visitor\TypeCheckVisitor.java
  */
 
 package visitor;
@@ -15,9 +15,9 @@ import syntaxtree.*;
 import java.util.*;
 
 /**
- * Build-symbol-table visitor
+ * Type-check visitor
  */
-public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
+public class TypeCheckVisitor extends GJDepthFirst<MSymbol, MSymbol> {
    //
    // Auto class visitors--probably don't need to be overridden.
    //
@@ -103,24 +103,11 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(MainClass n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
-
       n.f0.accept(this, argu);
       
-      MSymbol id1 = n.f1.accept(this, argu);
-      MClass mainClass = new MClass(id1.getName(), id1.getRow(), id1.getCol());
-      /** add main class to MTypeList */
-      err = MTypeList.AddClass(mainClass);
-      if (err != null)
-         ErrorHandler.Error(err, id1.getRow(), id1.getCol());
-      err = null;
-
-      MMethod mainMethod = new MMethod("main", "void", mainClass, n.f6.beginLine, n.f6.beginColumn);
-      /** add main method to mainClass */
-      err = mainClass.AddMethod(mainMethod);
-      if (err != null)
-         ErrorHandler.Error(err, mainMethod.getRow(), mainMethod.getCol());
-      err = null;
+      String mainClassName = n.f1.accept(this, argu).getName();
+      MClass mainClass = (MClass) MTypeList.getType(mainClassName);
+      MMethod mainMethod = mainClass.getMethod("main");
 
       n.f2.accept(this, mainClass);
       n.f3.accept(this, mainClass);
@@ -132,15 +119,7 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
       n.f8.accept(this, mainMethod);
       n.f9.accept(this, mainMethod);
       n.f10.accept(this, mainMethod);
-
-      MSymbol id2 = n.f11.accept(this, mainMethod);
-      MVar arg = new MVar(id2.getName(), "String[]", mainMethod, id2.getRow(), id2.getCol());
-      /** add arg to mainMethod */
-      err = mainMethod.AddArg(arg);
-      if (err != null)
-         ErrorHandler.Error(err, id2.getRow(), id2.getCol());
-      err = null;
-
+      n.f11.accept(this, mainMethod);
       n.f12.accept(this, mainMethod);
       n.f13.accept(this, mainMethod);
       n.f14.accept(this, mainMethod);
@@ -171,17 +150,10 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(ClassDeclaration n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
-
       n.f0.accept(this, argu);
 
-      MSymbol id = n.f1.accept(this, argu);
-      MClass simpleClass = new MClass(id.getName(), id.getRow(), id.getCol());
-      /** add class to MTypeList */
-      err = MTypeList.AddClass(simpleClass);
-      if (err != null)
-         ErrorHandler.Error(err, id.getRow(), id.getCol());
-      err = null;
+      String simpleClassName = n.f1.accept(this, argu).getName();
+      MClass simpleClass = (MClass) MTypeList.getType(simpleClassName);
 
       n.f2.accept(this, simpleClass);
       n.f3.accept(this, simpleClass);
@@ -207,15 +179,24 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
       n.f0.accept(this, argu);
 
       MSymbol id1 = n.f1.accept(this, argu);
+      String extendClassName = id1.getName();
+      MClass extendClass = (MClass) MTypeList.getType(extendClassName);
+
       n.f2.accept(this, argu);
+
       MSymbol id2 = n.f3.accept(this, argu);
-      /**
-       * subclass can be defined before superclass
-       * so only the name of superclass is avaliable for now
-       */
-      MClass extendClass = new MClass(id1.getName(), id2.getName(), id1.getRow(), id1.getCol());
-      /** add class to MTypeList */
-      err = MTypeList.AddClass(extendClass);
+      String parentClassName = id2.getName();
+      /** check whether parent class is defined */
+      err = MTypeList.CheckDef(parentClassName);
+      if (err != null) {
+         ErrorHandler.Error(err, id2.getRow(), id2.getCol());
+         /** clear parent */
+         extendClass.setParent(null);
+      }
+      err = null;
+
+      /** check circular inheritance */
+      err = extendClass.CheckCycle();
       if (err != null)
          ErrorHandler.Error(err, id1.getRow(), id1.getCol());
       err = null;
@@ -234,36 +215,8 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(VarDeclaration n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
-
-      /** 
-       * type can be Array, Boolean, Int (of MType)
-       * or an identifier (of MSymbol)
-       */
-      MSymbol type = n.f0.accept(this, argu);
-      MSymbol id =  n.f1.accept(this, argu);
-
-      /**
-       * type of a variable can be defined after var declaration
-       * so only the name of type is avaliable for now
-       */
-      MVar var = new MVar(id.getName(), type.getName(), argu, id.getRow(), id.getCol());
-
-      if (argu instanceof MClass) {
-         /** add var to argu(owner) */
-         err = ((MClass) argu).AddVar(var);
-         if (err != null)
-            ErrorHandler.Error(err, id.getRow(), id.getCol());
-         err = null;
-      } else if (argu instanceof MMethod) {
-         /** add var to argu(owner) */
-         err = ((MMethod) argu).AddVar(var);
-         if (err != null)
-            ErrorHandler.Error(err, id.getRow(), id.getCol());
-         err = null;
-      } else /** unlikely to fall into this */
-         ErrorHandler.Error("\33[31;1mIllegal position of variable declaration\33[0m", id.getRow(), id.getCol());
-
+      n.f0.accept(this, argu);
+      n.f1.accept(this, argu);
       n.f2.accept(this, argu);
       return _ret;
    }
@@ -288,19 +241,20 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
       String err=null;
 
       n.f0.accept(this, argu);
+      n.f1.accept(this, argu);
 
-      MSymbol type = n.f1.accept(this, argu);
       MSymbol id = n.f2.accept(this, argu);
-      /**
-       * return type of a method can be defined after method declaration
-       * so only the name of return type is avaliable for now
-       */
-      MMethod method = new MMethod(id.getName(), type.getName(), (MClass) argu, id.getRow(), id.getCol());
-      /** add method to argu(owner) */
-      err = ((MClass) argu).AddMethod(method);
-      if (err != null)
-         ErrorHandler.Error(err, id.getRow(), id.getCol());
-      err = null;
+      String methodName = id.getName();
+      MMethod method = ((MClass) argu).getMethod(methodName);
+
+      MClass parentClass = ((MClass) argu).getParent();
+      /** check overload */
+      if (parentClass != null) {
+         err = parentClass.CheckMethod(method);
+         if (err != null)
+            ErrorHandler.Error(err, id.getRow(), id.getCol());
+         err = null;
+      }
 
       n.f3.accept(this, method);
       n.f4.accept(this, method);
@@ -309,7 +263,14 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
       n.f7.accept(this, method);
       n.f8.accept(this, method);
       n.f9.accept(this, method);
-      n.f10.accept(this, method);
+
+      MVar var = (MVar) n.f10.accept(this, method);
+      /** var should match the return type */
+      err = method.getType().CheckType(var.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var.getRow(), var.getCol());
+      err = null;
+
       n.f11.accept(this, method);
       n.f12.accept(this, method);
       return _ret;
@@ -332,20 +293,8 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(FormalParameter n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
-
-      MSymbol type = n.f0.accept(this, argu);
-      MSymbol id = n.f1.accept(this, argu);
-      /**
-       * type of an arg can be defined after arg declaration
-       * so only the name of type is avaliable for now
-       */
-      MVar arg = new MVar(id.getName(), type.getName(), argu, id.getRow(), id.getCol());
-      /** add arg to argu(owner) */
-      err = ((MMethod) argu).AddArg(arg);
-      if (err != null)
-         ErrorHandler.Error(err, id.getRow(), id.getCol());
-      err = null;
+      n.f0.accept(this, argu);
+      n.f1.accept(this, argu);
       return _ret;
    }
 
@@ -368,8 +317,17 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(Type n, MSymbol argu) {
       MSymbol _ret=null;
+      String err=null;
+
       _ret = n.f0.accept(this, argu);
-      return _ret;
+      String typeName = _ret.getName();
+      /** check whether type exists */
+      err = MTypeList.CheckDef(typeName);
+      if (err != null)
+         ErrorHandler.Error(err, _ret.getRow(), _ret.getCol());
+      err = null;
+
+      return MTypeList.getType(typeName);
    }
 
    /**
@@ -441,9 +399,25 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(AssignmentStatement n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      String err=null;
+
+      MSymbol id = n.f0.accept(this, argu);
+      String var1Name = id.getName();
+      MVar var1 = ((MMethod) argu).getVar(var1Name);
+      if (var1 == null) {
+         ErrorHandler.Error("\33[31mVariable \33[32;4m" + var1Name + "\33[0m\33[31m undefined for method \33[34;4m" + argu.getName() + "\33[0m", id.getRow(), id.getCol());
+         var1 = new MVar(var1Name, "(undefined)", id.getRow(), id.getCol());
+      }
+
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+
+      MVar var2 = (MVar) n.f2.accept(this, argu);
+      /** can var2 be assigned to var1? */
+      err = var1.getType().CheckType(var2.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var2.getRow(), var2.getCol());
+      err = null;
+
       n.f3.accept(this, argu);
       return _ret;
    }
@@ -459,12 +433,41 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(ArrayAssignmentStatement n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      String err=null;
+
+      MSymbol id = n.f0.accept(this, argu);
+      String var1Name = id.getName();
+      MVar var1 = ((MMethod) argu).getVar(var1Name);
+      if (var1 == null) {
+         ErrorHandler.Error("\33[31mVariable \33[32;4m" + var1Name + "\33[0m\33[31m undefined for method \33[34;4m" + argu.getName() + "\33[0m", id.getRow(), id.getCol());
+         var1 = new MVar(var1Name, "(undefined)", id.getRow(), id.getCol());
+      }
+
+      /** var1 should be of type MArray */
+      err = MTypeList.Array().CheckType(var1.getType());
+      if (err != null)
+         ErrorHandler.Error(err, id.getRow(), id.getCol());
+      err = null;
+
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+
+      MVar var2 = (MVar) n.f2.accept(this, argu);
+      /** var2 should be of type MInt */
+      err = MTypeList.Int().CheckType(var2.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var2.getRow(), var2.getCol());
+      err = null;
+
       n.f3.accept(this, argu);
       n.f4.accept(this, argu);
-      n.f5.accept(this, argu);
+
+      MVar var3 = (MVar) n.f5.accept(this, argu);
+      /** var3 should be of type MInt */
+      err = MTypeList.Int().CheckType(var3.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var3.getRow(), var3.getCol());
+      err = null;
+
       n.f6.accept(this, argu);
       return _ret;
    }
@@ -480,9 +483,17 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(IfStatement n, MSymbol argu) {
       MSymbol _ret=null;
+      String err=null;
       n.f0.accept(this, argu);
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+
+      MVar var = (MVar) n.f2.accept(this, argu);
+      /** var should be of type MBoolean */
+      err = MTypeList.Boolean().CheckType(var.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var.getRow(), var.getCol());
+      err = null;
+
       n.f3.accept(this, argu);
       n.f4.accept(this, argu);
       n.f5.accept(this, argu);
@@ -499,9 +510,18 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(WhileStatement n, MSymbol argu) {
       MSymbol _ret=null;
+      String err=null;
+
       n.f0.accept(this, argu);
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+      
+      MVar var = (MVar) n.f2.accept(this, argu);
+      /** var should be of type MBoolean */
+      err = MTypeList.Boolean().CheckType(var.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var.getRow(), var.getCol());
+      err = null;
+
       n.f3.accept(this, argu);
       n.f4.accept(this, argu);
       return _ret;
@@ -516,9 +536,18 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(PrintStatement n, MSymbol argu) {
       MSymbol _ret=null;
+      String err=null;
+
       n.f0.accept(this, argu);
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+
+      MVar var = (MVar) n.f2.accept(this, argu);
+      /** var should be of type MInt */
+      err = MTypeList.Int().CheckType(var.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var.getRow(), var.getCol());
+      err = null;
+
       n.f3.accept(this, argu);
       n.f4.accept(this, argu);
       return _ret;
@@ -536,8 +565,7 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     *       | PrimaryExpression()
     */
    public MSymbol visit(Expression n, MSymbol argu) {
-      MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      MSymbol _ret = n.f0.accept(this, argu);
       return _ret;
    }
 
@@ -548,9 +576,25 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(AndExpression n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      String err=null;
+
+      MVar var1 = (MVar) n.f0.accept(this, argu);
+      /** var1 should be of type MBoolean */
+      err = MTypeList.Boolean().CheckType(var1.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var1.getRow(), var1.getCol());
+      err = null;
+
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+      MVar var2 = (MVar) n.f2.accept(this, argu);
+      /** var2 should be of type MBoolean */
+      err = MTypeList.Boolean().CheckType(var2.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var2.getRow(), var2.getCol());
+      err = null;
+
+      /** return an anonymous boolean variable */
+      _ret = new MVar(var1.getName() + " && " + var2.getName(), "boolean", var1.getRow(), var1.getCol());
       return _ret;
    }
 
@@ -561,9 +605,26 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(CompareExpression n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      String err=null;
+
+      MVar var1 = (MVar) n.f0.accept(this, argu);
+      /** var1 should be of type MInt */
+      err = MTypeList.Int().CheckType(var1.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var1.getRow(), var1.getCol());
+      err = null;
+
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+
+      MVar var2 = (MVar) n.f2.accept(this, argu);
+      /** var2 should be of type MInt */
+      err = MTypeList.Int().CheckType(var2.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var2.getRow(), var2.getCol());
+      err = null;
+
+      /** return an anonymous boolean variable */
+      _ret = new MVar(var1.getName() + " < " + var2.getName(), "boolean", var1.getRow(), var1.getCol());
       return _ret;
    }
 
@@ -574,9 +635,26 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(PlusExpression n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      String err=null;
+
+      MVar var1 = (MVar) n.f0.accept(this, argu);
+      /** var1 should be of type MInt */
+      err = MTypeList.Int().CheckType(var1.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var1.getRow(), var1.getCol());
+      err = null;
+      
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+      
+      MVar var2 = (MVar) n.f2.accept(this, argu);
+      /** var2 should be of type MInt */
+      err = MTypeList.Int().CheckType(var2.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var2.getRow(), var2.getCol());
+      err = null;
+
+      /** return an anonymous int variable */
+      _ret = new MVar(var1.getName() + " + " + var2.getName(), "int", var1.getRow(), var1.getCol());
       return _ret;
    }
 
@@ -587,9 +665,26 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(MinusExpression n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      String err=null;
+
+      MVar var1 = (MVar) n.f0.accept(this, argu);
+      /** var1 should be of type MInt */
+      err = MTypeList.Int().CheckType(var1.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var1.getRow(), var1.getCol());
+      err = null;
+
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+
+      MVar var2 = (MVar) n.f2.accept(this, argu);
+      /** var2 should be of type MInt */
+      err = MTypeList.Int().CheckType(var2.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var2.getRow(), var2.getCol());
+      err = null;
+
+      /** return an anonymous int variable */
+      _ret = new MVar(var1.getName() + " - " + var2.getName(), "int", var1.getRow(), var1.getCol());
       return _ret;
    }
 
@@ -600,9 +695,25 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(TimesExpression n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      String err=null;
+
+      MVar var1 = (MVar) n.f0.accept(this, argu);
+      /** var1 should be of type MInt */
+      err = MTypeList.Int().CheckType(var1.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var1.getRow(), var1.getCol());
+      err = null;
+
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+      MVar var2 = (MVar) n.f2.accept(this, argu);
+      /** var2 should be of type MInt */
+      err = MTypeList.Int().CheckType(var2.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var2.getRow(), var2.getCol());
+      err = null;
+
+      /** return an anonymous int variable */
+      _ret = new MVar(var1.getName() + " * " + var2.getName(), "int", var1.getRow(), var1.getCol());
       return _ret;
    }
 
@@ -614,10 +725,28 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(ArrayLookup n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      String err=null;
+
+      MVar var1 = (MVar) n.f0.accept(this, argu);
+      /** var1 should be of type MArray */
+      err = MTypeList.Array().CheckType(var1.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var1.getRow(), var1.getCol());
+      err = null;
+
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+
+      MVar var2 = (MVar) n.f2.accept(this, argu);
+      /** var2 should be of type MInt */
+      err = MTypeList.Int().CheckType(var2.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var2.getRow(), var2.getCol());
+      err = null;
+      
       n.f3.accept(this, argu);
+
+      /** return an anonymous int variable */
+      _ret = new MVar(var1.getName() + "[" + var2.getName() + "]", "int", var1.getRow(), var1.getCol());
       return _ret;
    }
 
@@ -628,9 +757,21 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(ArrayLength n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      String err=null;
+
+      MVar var = (MVar) n.f0.accept(this, argu);
+
+      /** var should be of type MArray */
+      err = MTypeList.Array().CheckType(var.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var.getRow(), var.getCol());
+      err = null;
+
       n.f1.accept(this, argu);
       n.f2.accept(this, argu);
+
+      /** return an anonymous int variable */
+      _ret = new MVar(var.getName() + ".length", "int", var.getRow(), var.getCol());
       return _ret;
    }
 
@@ -644,14 +785,77 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(MessageSend n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+
+      MVar var = (MVar) n.f0.accept(this, argu);
       n.f1.accept(this, argu);
-      n.f2.accept(this, argu);
+      MSymbol id = n.f2.accept(this, argu);
+      MType type = var.getType();
+      MMethod method=null;
+
+      /** whether type is a class */
+      if (!(type instanceof MClass))
+         ErrorHandler.Error("\33[31mCannot invoke \33[34;4m" + id.getName() + "\33[0m\33[31m on type \33[33;4m" + var.getTypeString() + "\33[0m", var.getRow(), var.getCol());
+      else {
+         method = ((MClass) type).getMethod(id.getName());
+         /** whether class contains method(identifier) */
+         if (method == null)
+            ErrorHandler.Error("\33[31mMethod \33[34;4m" + id.getName() + "\33[0m\33[31m undefined for type \33[33;4m" + var.getTypeString() + "\33[0m", var.getRow(), var.getCol());
+      }
+
       n.f3.accept(this, argu);
-      n.f4.accept(this, argu);
+
+      /**
+       * How to fetch the list of args' type?
+       * Define another visitor to visit ExpressionList!
+       */
+
+      class ExprList {
+         protected ArrayList<MType> argTypeList;
+         protected TypeCheckVisitor visitor;
+         protected MSymbol argu;
+         public ExprList(TypeCheckVisitor _visitor, MSymbol _argu) {
+            argTypeList = new ArrayList<MType>();
+            visitor = _visitor;
+            argu = _argu;
+         }
+         public String ErrInfo() {
+            String info = "\33[31m(";
+            Iterator<MType> it = argTypeList.iterator();
+            if (it.hasNext())
+               info = info + "\33[33;4m" + it.next().getName();
+            while (it.hasNext())
+               info = info + "\33[0m\33[31m, \33[33;4m" + it.next().getName();
+            return info + "\33[0m\33[31m)\33[0m";
+         }
+      }
+
+      class ExprListVisitor extends GJVoidDepthFirst<ExprList> {
+         public void visit(Expression n, ExprList e) {
+            MVar var = (MVar) n.accept(e.visitor, e.argu);
+            e.argTypeList.add(var.getType());
+         }
+      }
+
+      ExprList argList = new ExprList(this, argu);
+      n.f4.accept(new ExprListVisitor(), argList);
+
+      /** check args' legality */
+      if (method != null)
+         if (!method.CheckArgs(argList.argTypeList))
+            ErrorHandler.Error("\33[31mInvalid args \33[30m" + argList.ErrInfo() + "\33[31m for method \33[30m" + method.ErrInfo() + "\33[31m in type \33[33;4m" + type.getName() + "\33[30m", id.getRow(), id.getCol());
+
       n.f5.accept(this, argu);
+
+      /** return an anonymous variable */
+      if (method != null)
+         _ret = new MVar(var.getName() + "." + method.getName() + "()", method.getTypeString(), var.getRow(), var.getCol());
+      else
+         _ret = new MVar("ErrorMethodCall", "(undefined)", var.getRow(), var.getCol());
+      
       return _ret;
    }
+
+   
 
    /**
     * f0 -> Expression()
@@ -688,7 +892,20 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(PrimaryExpression n, MSymbol argu) {
       MSymbol _ret=null;
-      n.f0.accept(this, argu);
+      _ret = n.f0.accept(this, argu);
+
+      /** check whether an variable(identifier) is defined */
+      if (!(_ret instanceof MVar)) {
+         String varName = _ret.getName();
+         MVar var = ((MMethod) argu).getVar(varName);
+         if (var == null) {
+            ErrorHandler.Error("\33[31mVariable \33[32;4m" + varName + "\33[0m\33[31m undefined for method \33[34;4m" + argu.getName() + "\33[0m", _ret.getRow(), _ret.getCol());
+            _ret = new MVar(varName, "(undefined)", _ret.getRow(), _ret.getCol());
+         }
+         else
+            _ret = new MVar(varName, var.getTypeString(), _ret.getRow(), _ret.getCol());
+      }
+
       return _ret;
    }
 
@@ -698,6 +915,9 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
    public MSymbol visit(IntegerLiteral n, MSymbol argu) {
       MSymbol _ret=null;
       n.f0.accept(this, argu);
+
+      /** return an anonymous int variable */
+      _ret = new MVar(n.f0.toString(), "int", n.f0.beginLine, n.f0.beginColumn);
       return _ret;
    }
 
@@ -707,6 +927,9 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
    public MSymbol visit(TrueLiteral n, MSymbol argu) {
       MSymbol _ret=null;
       n.f0.accept(this, argu);
+
+      /** return an anonymous boolean variable "true" */
+      _ret = new MVar("true", "boolean", n.f0.beginLine, n.f0.beginColumn);
       return _ret;
    }
 
@@ -716,6 +939,9 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
    public MSymbol visit(FalseLiteral n, MSymbol argu) {
       MSymbol _ret=null;
       n.f0.accept(this, argu);
+
+      /** return an anonymous boolean variable "false" */
+      _ret = new MVar("false", "boolean", n.f0.beginLine, n.f0.beginColumn);
       return _ret;
    }
 
@@ -726,7 +952,7 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
       MSymbol _ret=null;
       n.f0.accept(this, argu);
 
-      /** generate an MSymbol instance and pass upward */
+      /** return an MSymbol instance and pass upward */
       _ret = new MSymbol(n.f0.toString(), n.f0.beginLine, n.f0.beginColumn);
       return _ret;
    }
@@ -737,6 +963,9 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
    public MSymbol visit(ThisExpression n, MSymbol argu) {
       MSymbol _ret=null;
       n.f0.accept(this, argu);
+
+      /** return an anonymous variable "this" */
+      _ret = new MVar("this", ((MMethod) argu).getOwner().getName(), n.f0.beginLine, n.f0.beginColumn);
       return _ret;
    }
 
@@ -749,11 +978,23 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(ArrayAllocationExpression n, MSymbol argu) {
       MSymbol _ret=null;
+      String err=null;
+
       n.f0.accept(this, argu);
       n.f1.accept(this, argu);
       n.f2.accept(this, argu);
-      n.f3.accept(this, argu);
+
+      MVar var = (MVar) n.f3.accept(this, argu);
+      /** var should be of type MInt */
+      err = MTypeList.Int().CheckType(var.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var.getRow(), var.getCol());
+      err = null;
+
       n.f4.accept(this, argu);
+
+      /** return an anonymous int[] variable */
+      _ret = new MVar("new int[" + var.getName() + "]", "int[]", n.f0.beginLine, n.f0.beginColumn);
       return _ret;
    }
 
@@ -765,10 +1006,23 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(AllocationExpression n, MSymbol argu) {
       MSymbol _ret=null;
+      String err=null;
+
       n.f0.accept(this, argu);
-      n.f1.accept(this, argu);
+
+      MSymbol id = n.f1.accept(this, argu);
+      String typeName = id.getName();
+      /** check whether class(identifier) is defined */
+      err = MTypeList.CheckDef(typeName);
+      if (err != null)
+         ErrorHandler.Error(err, id.getRow(), id.getCol());
+      err = null;
+
       n.f2.accept(this, argu);
       n.f3.accept(this, argu);
+
+      /** return an anonymous class instance */
+      _ret = new MVar("new " + typeName + "()", typeName, n.f0.beginLine, n.f0.beginColumn);
       return _ret;
    }
 
@@ -778,8 +1032,18 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(NotExpression n, MSymbol argu) {
       MSymbol _ret=null;
+      String err=null;
+
       n.f0.accept(this, argu);
-      n.f1.accept(this, argu);
+      MVar var = (MVar) n.f1.accept(this, argu);
+      /** var should be of type MBoolean */
+      err = MTypeList.Boolean().CheckType(var.getType());
+      if (err != null)
+         ErrorHandler.Error(err, var.getRow(), var.getCol());
+      err = null;
+
+      /** return an anonymous boolean variable */
+      _ret = new MVar("!" + var.getName(), "boolean", n.f0.beginLine, n.f0.beginColumn);
       return _ret;
    }
 
@@ -791,7 +1055,7 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
    public MSymbol visit(BracketExpression n, MSymbol argu) {
       MSymbol _ret=null;
       n.f0.accept(this, argu);
-      n.f1.accept(this, argu);
+      _ret = n.f1.accept(this, argu);
       n.f2.accept(this, argu);
       return _ret;
    }

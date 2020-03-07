@@ -2,7 +2,7 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 15:52:59
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-05 21:48:15
+ * @LastEditTime : 2020-03-07 11:56:45
  * @Description  : Class for user-declared types
  * @FilePath     : \Compiler\minijava\symbol\MClass.java
  */
@@ -41,79 +41,137 @@ public class MClass extends MType {
         return (MClass) MTypeList.getType(parent);
     }
 
-    /**
-     * Check whether a given MType instance matches this (can assign to this)
-     * 
-     * @param type    instance of MType
-     * @param verbose verbose mode on true
-     * @return: true on match, false otherwise
-     */
-    public boolean CheckType(MType type, boolean verbose) {
-        if (!(type instanceof MClass)) {
-            if (verbose)
-                ; // Handle error
-            return false;
-        }
-
-        /** type should be the subclass of this */
-        MClass c = (MClass) type;
-        while (c != null) {
-            if (c == this)
-                return true;
-            c = c.getParent();
-        }
-
-        if (verbose)
-            ; // Handle error
-        return false;
+    public void setParent(String _parent) {
+        parent = _parent;
     }
 
     /**
      * Add a member variable to vars
      * 
      * @param var instance of MVar
-     * @return: true on success, false on fail
+     * @return null on success, error message on fail
      */
-    public boolean AddVar(MVar var) {
+    public String AddVar(MVar var) {
         if (vars.containsKey(var.name))
-            return false;
+            return "\33[31mVariable \33[32;4m" + var.name + "\33[0m\33[31m duplicate declaration\33[0m";
         vars.put(var.name, var);
-        return true;
+        return null;
     }
 
     /**
      * Add a member method to methods
      * 
      * @param method instance of MMethod
-     * @return: true on success, false on fail
+     * @return null on success, error message on fail
      */
-    public boolean AddMethod(MMethod method) {
+    public String AddMethod(MMethod method) {
         if (methods.containsKey(method.name))
-            return false;
+            return "\33[31mMethod \33[34;4m" + method.name + "\33[0m\33[31m duplicate declaration\33[0m";
         methods.put(method.name, method);
-        return true;
+        return null;
     }
 
     /**
-     * Check whether a method from a subclass is compatible (not a overload)
+     * Get a member variable (declared in this or superclasses)
+     * 
+     * @param varName name of the variable
+     * @return MVar instance if found, null otherwise
+     */
+    public MVar getVar(String varName) {
+        if (vars.containsKey(varName))
+            return vars.get(varName);
+
+        MClass c = this.getParent();
+        if (c != null)
+            return c.getVar(varName);
+
+        return null;
+    }
+
+    /**
+     * Get a member method (declared in this or superclasses)
+     * 
+     * @param methodName name of the method
+     * @return MMethod instance if found, null otherwise
+     */
+    public MMethod getMethod(String methodName) {
+        if (methods.containsKey(methodName))
+            return methods.get(methodName);
+
+        MClass c = this.getParent();
+        if (c != null)
+            return c.getMethod(methodName);
+
+        return null;
+    }
+
+    /**
+     * Check if a given MType instance matches this (can assign to this)
+     * 
+     * @param type instance of MType
+     * @return null on success, error message on fail
+     */
+    public String CheckType(MType type) {
+        String err = "\33[31mType mismatch: cannot convert from \33[33;4m" + type.name + "\33[0m\33[31m to \33[33;4m"
+                + name + "\33[0m";
+
+        if (!(type instanceof MClass))
+            return err;
+
+        /** type should be the subclass of this */
+        MClass c = (MClass) type;
+        while (c != null) {
+            if (c == this)
+                return null;
+            c = c.getParent();
+        }
+
+        return err;
+    }
+
+    /**
+     * Check whether a cycle exists in the type hierachy of this
+     * 
+     * @return null on non-exist, error message on exist
+     */
+    public String CheckCycle() {
+        MClass c = this.getParent();
+        while (c != null) {
+            if (c.parent == this.name)
+                return "\33[31mCycle detected: a cycle exists in the type hierachy between \33[33;4m" + c.parent
+                        + "\33[0m\33[31m and \33[33;4m" + this.name + "\33[0m";
+            c = c.getParent();
+        }
+        return null;
+    }
+
+    /**
+     * Check whether a method from a subclass is compatible (override parent's
+     * method is allowed, while overload is not)
      * 
      * @param _method a method from a subclass
-     * @return: true on compatible, false otherwise
+     * @return null on compatible, error message otherwise
      */
-    public boolean CheckMethod(MMethod _method) {
+    public String CheckMethod(MMethod _method) {
         if (methods.containsKey(_method.name)) {
             MMethod method = methods.get(_method.name);
+
+            String err = "\33[31mMethod \33[33;4m" + _method.type + "\33[0m\33[31m " + _method.ErrInfo()
+                    + "\33[31m collides with \33[33;4m" + method.type + "\33[0m\33[31m " + method.ErrInfo();
+
             /** check return type */
-            if (!method.getType().CheckType(_method.getType(), false))
-                return false;
+            if (_method.type != method.type)
+                return err;
+
             /** check args */
             if (!method.CheckArgs(_method.args))
-                return false;
+                return err;
         }
+
         /** check parent's member methods */
         if (parent != null)
             return this.getParent().CheckMethod(_method);
-        return true;
+        return null;
     }
 
     public void Print() {
@@ -125,7 +183,7 @@ public class MClass extends MType {
         /** print vars */
         if (vars.size() > 0) {
             System.out.println();
-            System.out.println("    \33[36;1m// VARS\33[0m");
+            System.out.println("    // VARS");
             for (MVar var : vars.values()) {
                 var.Print("    ");
                 System.out.println();
@@ -135,7 +193,7 @@ public class MClass extends MType {
         /** print methods */
         System.out.println();
         if (methods.size() > 0) {
-            System.out.println("    \33[36;1m// METHODS\33[0m");
+            System.out.println("    // METHODS");
             for (MMethod method : methods.values())
                 method.Print("    ");
         }

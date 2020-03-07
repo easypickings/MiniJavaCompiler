@@ -2,7 +2,7 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 17:32:02
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-05 21:57:19
+ * @LastEditTime : 2020-03-07 12:12:28
  * @Description  : Class for methods 
  * @FilePath     : \Compiler\minijava\symbol\MMethod.java
  */
@@ -47,44 +47,58 @@ public class MMethod extends MSymbol {
      * Add an arg to args
      * 
      * @param arg instance of MVar
-     * @return: true on success, false on fail
+     * @return null on success, error message on fail
      */
-    public boolean AddArg(MVar arg) {
+    public String AddArg(MVar arg) {
         if (args.containsKey(arg.name))
-            return false;
+            return "\33[31mArg \33[32;4m" + arg.name + "\33[0m\33[31m duplicate declaration\33[0m";
         args.put(arg.name, arg);
-        return true;
+        return null;
     }
 
     /**
      * Add a local variable to vars
      * 
      * @param var instance of MVar
-     * @return: true on success, false on fail
+     * @return null on success, error message on fail
      */
-    public boolean AddVar(MVar var) {
+    public String AddVar(MVar var) {
         if (vars.containsKey(var.name))
-            return false;
+            return "\33[31mVariable \33[32;4m" + var.name + "\33[0m\33[31m duplicate declaration\33[0m";
         vars.put(var.name, var);
-        return true;
+        return null;
     }
 
     /**
-     * Check whether the args list from a method is identical (in number and type)
+     * Get a variable valid in the method's scope
+     * 
+     * @param varName name of the variable
+     * @return MVar instance if found, null otherwise
+     */
+    public MVar getVar(String varName) {
+        if (vars.containsKey(varName))
+            return vars.get(varName);
+        if (args.containsKey(varName))
+            return args.get(varName);
+
+        return owner.getVar(varName);
+    }
+
+    /**
+     * Check whether the args list from a method is IDENTICAL (in number and type)
      * to the args of this
      * 
      * @param _args an args list from a method
-     * @return: true on identical, false otherwise
+     * @return true on identical, false otherwise
      */
     public boolean CheckArgs(LinkedHashMap<String, MVar> _args) {
-
         /** check the number of args */
         if (args.size() != _args.size())
             return false;
 
         Iterator<Map.Entry<String, MVar>> it = args.entrySet().iterator();
         Iterator<Map.Entry<String, MVar>> _it = _args.entrySet().iterator();
-        while (it.hasNext() && _it.hasNext()) {
+        while (it.hasNext()) {
             Map.Entry<String, MVar> entry = it.next();
             Map.Entry<String, MVar> _entry = _it.next();
             /** check the type of each arg */
@@ -95,29 +109,63 @@ public class MMethod extends MSymbol {
         return true;
     }
 
+    /**
+     * Check whether the args' type list from a method call is legal
+     * 
+     * @param _args an args' type list
+     * @return true on legal, false otherwise
+     */
+    public boolean CheckArgs(ArrayList<MType> _args) {
+        /** check the number of args */
+        if (args.size() != _args.size())
+            return false;
+
+        Iterator<Map.Entry<String, MVar>> it = args.entrySet().iterator();
+        Iterator<MType> _it = _args.iterator();
+        while (it.hasNext()) {
+            MType argType = it.next().getValue().getType();
+            /** check whether the types of each arg pair match */
+            if (argType.CheckType(_it.next()) != null)
+                return false;
+        }
+        return true;
+    }
+
     public void Print(String indent) {
-        System.out.print(indent + "\33[33;4m" + type + " \33[34;4m" + name + "\33[0m ( ");
+        System.out.print(indent + "\33[33;4m" + type + "\33[0m \33[34;4m" + name + "\33[0m(");
 
         /** print args */
         Iterator<Map.Entry<String, MVar>> it = args.entrySet().iterator();
+        if (it.hasNext())
+            it.next().getValue().Print("");
         while (it.hasNext()) {
-            Map.Entry<String, MVar> entry = it.next();
-            entry.getValue().Print("");
             System.out.print(", ");
+            it.next().getValue().Print("");
         }
-        System.out.println(") {");
+        System.out.print(") {");
 
         /** print vars */
         if (vars.size() > 0) {
             System.out.println();
-            System.out.println(indent + "    \33[36;1m// LOCAL VARS\33[0m");
             for (MVar var : vars.values()) {
                 var.Print(indent + "    ");
                 System.out.println();
             }
-        }
-
-        System.out.println(indent + "}");
+            System.out.println(indent + "}");
+        } else
+            System.out.println("}");
         System.out.println();
+    }
+
+    public String ErrInfo() {
+        String info = "\33[34;4m" + name + "\33[0m\33[31m(";
+
+        /** print args */
+        Iterator<Map.Entry<String, MVar>> it = args.entrySet().iterator();
+        if (it.hasNext())
+            info = info + "\33[33;4m" + it.next().getValue().type;
+        while (it.hasNext())
+            info = info + "\33[0m\33[31m, \33[33;4m" + it.next().getValue().type;
+        return info + "\33[0m\33[31m)\33[0m";
     }
 }

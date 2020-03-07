@@ -2,7 +2,7 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 12:45:10
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-05 14:36:56
+ * @LastEditTime : 2020-03-06 15:12:26
  * @Description  : Abstract class for types
  * @FilePath     : \Compiler\minijava\symbol\MType.java
  */
@@ -28,9 +28,8 @@ public abstract class MType extends MSymbol {
     /**
      * Check if a given MType instance matches this (can assign to this)
      * 
-     * @param type    instance of MType
-     * @param verbose verbose mode on true
-     * @return: true on match, false otherwise
+     * @param type instance of MType
+     * @return null on success, error message on fail
      */
-    public abstract boolean CheckType(MType type, boolean verbose);
+    public abstract String CheckType(MType type);
 }
