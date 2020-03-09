@@ -2,7 +2,7 @@
  * @Author       : Can Su
  * @Date         : 2020-03-05 14:49:46
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-07 17:05:30
+ * @LastEditTime : 2020-03-09 18:11:46
  * @Description  : Build-symbol-table visitor
  * @FilePath     : \Compiler\minijava\visitor\BuildSymbolTableVisitor.java
  */
@@ -103,24 +103,16 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(MainClass n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
-
       n.f0.accept(this, argu);
       
       MSymbol id1 = n.f1.accept(this, argu);
       MClass mainClass = new MClass(id1.getName(), id1.getRow(), id1.getCol());
       /** add main class to MTypeList */
-      err = MTypeList.AddClass(mainClass);
-      if (err != null)
-         ErrorHandler.Error(err, id1.getRow(), id1.getCol());
-      err = null;
+      MTypeList.AddClass(mainClass);
 
       MMethod mainMethod = new MMethod("main", "void", mainClass, n.f6.beginLine, n.f6.beginColumn);
       /** add main method to mainClass */
-      err = mainClass.AddMethod(mainMethod);
-      if (err != null)
-         ErrorHandler.Error(err, mainMethod.getRow(), mainMethod.getCol());
-      err = null;
+      mainClass.AddMethod(mainMethod);
 
       n.f2.accept(this, mainClass);
       n.f3.accept(this, mainClass);
@@ -136,10 +128,7 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
       MSymbol id2 = n.f11.accept(this, mainMethod);
       MVar arg = new MVar(id2.getName(), "String[]", mainMethod, id2.getRow(), id2.getCol());
       /** add arg to mainMethod */
-      err = mainMethod.AddArg(arg);
-      if (err != null)
-         ErrorHandler.Error(err, id2.getRow(), id2.getCol());
-      err = null;
+      mainMethod.AddArg(arg);
 
       n.f12.accept(this, mainMethod);
       n.f13.accept(this, mainMethod);
@@ -171,17 +160,12 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(ClassDeclaration n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
-
       n.f0.accept(this, argu);
 
       MSymbol id = n.f1.accept(this, argu);
       MClass simpleClass = new MClass(id.getName(), id.getRow(), id.getCol());
       /** add class to MTypeList */
-      err = MTypeList.AddClass(simpleClass);
-      if (err != null)
-         ErrorHandler.Error(err, id.getRow(), id.getCol());
-      err = null;
+      MTypeList.AddClass(simpleClass);
 
       n.f2.accept(this, simpleClass);
       n.f3.accept(this, simpleClass);
@@ -202,8 +186,6 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(ClassExtendsDeclaration n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
-
       n.f0.accept(this, argu);
 
       MSymbol id1 = n.f1.accept(this, argu);
@@ -215,10 +197,7 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
        */
       MClass extendClass = new MClass(id1.getName(), id2.getName(), id1.getRow(), id1.getCol());
       /** add class to MTypeList */
-      err = MTypeList.AddClass(extendClass);
-      if (err != null)
-         ErrorHandler.Error(err, id1.getRow(), id1.getCol());
-      err = null;
+      MTypeList.AddClass(extendClass);
 
       n.f4.accept(this, extendClass);
       n.f5.accept(this, extendClass);
@@ -234,7 +213,6 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(VarDeclaration n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
 
       /** 
        * type can be Array, Boolean, Int (of MType)
@@ -249,19 +227,13 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
        */
       MVar var = new MVar(id.getName(), type.getName(), argu, id.getRow(), id.getCol());
 
-      if (argu instanceof MClass) {
+      if (argu instanceof MClass)
          /** add var to argu(owner) */
-         err = ((MClass) argu).AddVar(var);
-         if (err != null)
-            ErrorHandler.Error(err, id.getRow(), id.getCol());
-         err = null;
-      } else if (argu instanceof MMethod) {
+         ((MClass) argu).AddVar(var);
+      else if (argu instanceof MMethod)
          /** add var to argu(owner) */
-         err = ((MMethod) argu).AddVar(var);
-         if (err != null)
-            ErrorHandler.Error(err, id.getRow(), id.getCol());
-         err = null;
-      } else /** unlikely to fall into this */
+         ((MMethod) argu).AddVar(var);
+      else /** unlikely to fall into this */
          ErrorHandler.Error("\33[31;1mIllegal position of variable declaration\33[0m", id.getRow(), id.getCol());
 
       n.f2.accept(this, argu);
@@ -285,8 +257,6 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(MethodDeclaration n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
-
       n.f0.accept(this, argu);
 
       MSymbol type = n.f1.accept(this, argu);
@@ -297,10 +267,7 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
        */
       MMethod method = new MMethod(id.getName(), type.getName(), (MClass) argu, id.getRow(), id.getCol());
       /** add method to argu(owner) */
-      err = ((MClass) argu).AddMethod(method);
-      if (err != null)
-         ErrorHandler.Error(err, id.getRow(), id.getCol());
-      err = null;
+      ((MClass) argu).AddMethod(method);
 
       n.f3.accept(this, method);
       n.f4.accept(this, method);
@@ -332,7 +299,6 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
     */
    public MSymbol visit(FormalParameter n, MSymbol argu) {
       MSymbol _ret=null;
-      String err=null;
 
       MSymbol type = n.f0.accept(this, argu);
       MSymbol id = n.f1.accept(this, argu);
@@ -342,10 +308,8 @@ public class BuildSymbolTableVisitor extends GJDepthFirst<MSymbol, MSymbol> {
        */
       MVar arg = new MVar(id.getName(), type.getName(), argu, id.getRow(), id.getCol());
       /** add arg to argu(owner) */
-      err = ((MMethod) argu).AddArg(arg);
-      if (err != null)
-         ErrorHandler.Error(err, id.getRow(), id.getCol());
-      err = null;
+      ((MMethod) argu).AddArg(arg);
+
       return _ret;
    }
 

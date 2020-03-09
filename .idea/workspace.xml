@@ -6,7 +6,43 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8b7d10ee-8e78-4cc3-9207-fa22e96184fe" name="Default Changelist" comment="" />
+    <list default="true" id="8b7d10ee-8e78-4cc3-9207-fa22e96184fe" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minijava/error/ErrorHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/minijava/error/ErrorHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minijava/symbol/MClass.java" beforeDir="false" afterPath="$PROJECT_DIR$/minijava/symbol/MClass.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minijava/symbol/MMethod.java" beforeDir="false" afterPath="$PROJECT_DIR$/minijava/symbol/MMethod.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minijava/symbol/MTypeList.java" beforeDir="false" afterPath="$PROJECT_DIR$/minijava/symbol/MTypeList.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minijava/symbol/MVar.java" beforeDir="false" afterPath="$PROJECT_DIR$/minijava/symbol/MVar.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minijava/visitor/BuildSymbolTableVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/minijava/visitor/BuildSymbolTableVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minijava/visitor/TypeCheckVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/minijava/visitor/TypeCheckVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/Compiler.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/Compiler_jar/Compiler.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/BinaryTree-error.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/BinaryTree.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/BubbleSort-error.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/BubbleSort.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/Factorial-error.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/Factorial.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/LinearSearch-error.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/LinearSearch.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/LinkedList-error.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/LinkedList.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/MoreThan4-error.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/MoreThan4.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/QuickSort-error.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/QuickSort.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/TreeVisitor-error.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/Compiler_jar/programs/TreeVisitor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/minijava/error/ErrorHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/minijava/error/ErrorHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/minijava/symbol/MClass.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/minijava/symbol/MClass.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/minijava/symbol/MMethod.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/minijava/symbol/MMethod.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/minijava/symbol/MTypeList.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/minijava/symbol/MTypeList.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/minijava/symbol/MVar.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/minijava/symbol/MVar.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/minijava/visitor/BuildSymbolTableVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/minijava/visitor/BuildSymbolTableVisitor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/minijava/visitor/TypeCheckVisitor$1ExprList.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/minijava/visitor/TypeCheckVisitor$1ExprList.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/minijava/visitor/TypeCheckVisitor$1ExprListVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/minijava/visitor/TypeCheckVisitor$1ExprListVisitor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Compiler/minijava/visitor/TypeCheckVisitor.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Compiler/minijava/visitor/TypeCheckVisitor.class" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -29,6 +65,12 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="project.structure.last.edited" value="Artifacts" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -46,6 +88,9 @@
       <updated>1583567398736</updated>
       <workItem from="1583567400014" duration="1075000" />
       <workItem from="1583572110194" duration="135000" />
+      <workItem from="1583748920041" duration="746000" />
+      <workItem from="1583751786670" duration="348000" />
+      <workItem from="1583752425986" duration="185000" />
     </task>
     <servers />
   </component>
@@ -73,9 +118,13 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="619" y="271" key="classpath-attribute-editor/0.0.1536.824@0.0.1536.824" timestamp="1583568196247" />
-    <state x="412" y="238" key="com.intellij.ide.util.TipDialog" timestamp="1583572111554">
+    <state x="412" y="238" key="com.intellij.ide.util.TipDialog" timestamp="1583752431528">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="412" y="238" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1583572111554" />
+    <state x="412" y="238" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1583752431528" />
+    <state x="444" y="99" width="672" height="678" key="search.everywhere.popup" timestamp="1583752610530">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="444" y="99" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1583752610530" />
   </component>
 </project>

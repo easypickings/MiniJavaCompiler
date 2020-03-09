@@ -2,13 +2,14 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 15:52:59
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-07 11:56:45
+ * @LastEditTime : 2020-03-09 18:02:19
  * @Description  : Class for user-declared types
  * @FilePath     : \Compiler\minijava\symbol\MClass.java
  */
 
 package minijava.symbol;
 
+import minijava.error.*;
 import java.util.*;
 
 /**
@@ -49,26 +50,26 @@ public class MClass extends MType {
      * Add a member variable to vars
      * 
      * @param var instance of MVar
-     * @return null on success, error message on fail
      */
-    public String AddVar(MVar var) {
+    public void AddVar(MVar var) {
         if (vars.containsKey(var.name))
-            return "\33[31mVariable \33[32;4m" + var.name + "\33[0m\33[31m duplicate declaration\33[0m";
-        vars.put(var.name, var);
-        return null;
+            ErrorHandler.Error("\33[31mVariable \33[32;4m" + var.name + "\33[0m\33[31m duplicate declaration\33[0m",
+                    var.row, var.col);
+        else
+            vars.put(var.name, var);
     }
 
     /**
      * Add a member method to methods
      * 
      * @param method instance of MMethod
-     * @return null on success, error message on fail
      */
-    public String AddMethod(MMethod method) {
+    public void AddMethod(MMethod method) {
         if (methods.containsKey(method.name))
-            return "\33[31mMethod \33[34;4m" + method.name + "\33[0m\33[31m duplicate declaration\33[0m";
-        methods.put(method.name, method);
-        return null;
+            ErrorHandler.Error("\33[31mMethod \33[34;4m" + method.name + "\33[0m\33[31m duplicate declaration\33[0m",
+                    method.row, method.col);
+        else
+            methods.put(method.name, method);
     }
 
     /**
@@ -131,18 +132,17 @@ public class MClass extends MType {
 
     /**
      * Check whether a cycle exists in the type hierachy of this
-     * 
-     * @return null on non-exist, error message on exist
      */
-    public String CheckCycle() {
+    public void CheckCycle() {
         MClass c = this.getParent();
         while (c != null) {
-            if (c.parent == this.name)
-                return "\33[31mCycle detected: a cycle exists in the type hierachy between \33[33;4m" + c.parent
-                        + "\33[0m\33[31m and \33[33;4m" + this.name + "\33[0m";
+            if (c.parent == this.name) {
+                ErrorHandler.Error("\33[31mCycle detected: a cycle exists in the type hierachy between \33[33;4m"
+                        + c.parent + "\33[0m\33[31m and \33[33;4m" + this.name + "\33[0m", row, col);
+                return;
+            }
             c = c.getParent();
         }
-        return null;
     }
 
     /**

@@ -2,7 +2,7 @@
  * @Author       : Can Su
  * @Date         : 2020-03-05 14:49:46
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-07 17:06:33
+ * @LastEditTime : 2020-03-09 18:58:39
  * @Description  : Type-check visitor
  * @FilePath     : \Compiler\minijava\visitor\TypeCheckVisitor.java
  */
@@ -196,10 +196,7 @@ public class TypeCheckVisitor extends GJDepthFirst<MSymbol, MSymbol> {
       err = null;
 
       /** check circular inheritance */
-      err = extendClass.CheckCycle();
-      if (err != null)
-         ErrorHandler.Error(err, id1.getRow(), id1.getCol());
-      err = null;
+      extendClass.CheckCycle();
 
       n.f4.accept(this, extendClass);
       n.f5.accept(this, extendClass);
@@ -273,6 +270,9 @@ public class TypeCheckVisitor extends GJDepthFirst<MSymbol, MSymbol> {
 
       n.f11.accept(this, method);
       n.f12.accept(this, method);
+
+      method.CheckUse();
+
       return _ret;
    }
 
@@ -417,6 +417,9 @@ public class TypeCheckVisitor extends GJDepthFirst<MSymbol, MSymbol> {
       if (err != null)
          ErrorHandler.Error(err, var2.getRow(), var2.getCol());
       err = null;
+
+      /** var1 is initiated */
+      var1.Inited();
 
       n.f3.accept(this, argu);
       return _ret;
@@ -902,8 +905,13 @@ public class TypeCheckVisitor extends GJDepthFirst<MSymbol, MSymbol> {
             ErrorHandler.Error("\33[31mVariable \33[32;4m" + varName + "\33[0m\33[31m undefined for method \33[34;4m" + argu.getName() + "\33[0m", _ret.getRow(), _ret.getCol());
             _ret = new MVar(varName, "(undefined)", _ret.getRow(), _ret.getCol());
          }
-         else
+         else {
+            /** variable is used */
+            var.Used();
+            if (!((MMethod) argu).CheckInit(var))
+               ErrorHandler.Warn("\33[33mVariable \33[32;4m" + varName + "\33[0m\33[33m may not have been initialized \33[0m", _ret.getRow(), _ret.getCol());
             _ret = new MVar(varName, var.getTypeString(), _ret.getRow(), _ret.getCol());
+         }
       }
 
       return _ret;

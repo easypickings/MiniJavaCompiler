@@ -2,13 +2,14 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 16:09:12
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-06 20:09:04
+ * @LastEditTime : 2020-03-09 17:54:58
  * @Description  : Container of all MType instances
  * @FilePath     : \Compiler\minijava\symbol\MTypeList.java
  */
 
 package minijava.symbol;
 
+import minijava.error.*;
 import java.util.*;
 
 /**
@@ -31,13 +32,11 @@ public class MTypeList extends MSymbol {
      * Add a user-declared class to Classes
      * 
      * @param type instance of MClass
-     * @return null on success, error message on fail
      */
-    public static String AddClass(MClass type) {
+    public static void AddClass(MClass type) {
         if (Classes.containsKey(type.name))
-            return "\33[31mClass \33[33;4m" + type.name + "\33[0m\33[31m duplicate declaration\33[0m";
-        Classes.put(type.name, type);
-        return null;
+            ErrorHandler.Error("\33[31mClass \33[33;4m" + type.name + "\33[0m\33[31m duplicate declaration\33[0m", type.row, type.col);
+        else Classes.put(type.name, type);
     }
 
     public static MType getType(String type) {

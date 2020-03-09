@@ -2,13 +2,14 @@
  * @Author       : Can Su
  * @Date         : 2020-03-04 17:32:02
  * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-07 12:12:28
+ * @LastEditTime : 2020-03-09 18:58:06
  * @Description  : Class for methods 
  * @FilePath     : \Compiler\minijava\symbol\MMethod.java
  */
 
 package minijava.symbol;
 
+import minijava.error.*;
 import java.util.*;
 
 /**
@@ -47,26 +48,26 @@ public class MMethod extends MSymbol {
      * Add an arg to args
      * 
      * @param arg instance of MVar
-     * @return null on success, error message on fail
      */
-    public String AddArg(MVar arg) {
+    public void AddArg(MVar arg) {
         if (args.containsKey(arg.name))
-            return "\33[31mArg \33[32;4m" + arg.name + "\33[0m\33[31m duplicate declaration\33[0m";
-        args.put(arg.name, arg);
-        return null;
+            ErrorHandler.Error("\33[31mArg \33[32;4m" + arg.name + "\33[0m\33[31m duplicate declaration\33[0m", arg.row,
+                    arg.col);
+        else
+            args.put(arg.name, arg);
     }
 
     /**
      * Add a local variable to vars
      * 
      * @param var instance of MVar
-     * @return null on success, error message on fail
      */
-    public String AddVar(MVar var) {
-        if (vars.containsKey(var.name))
-            return "\33[31mVariable \33[32;4m" + var.name + "\33[0m\33[31m duplicate declaration\33[0m";
-        vars.put(var.name, var);
-        return null;
+    public void AddVar(MVar var) {
+        if (vars.containsKey(var.name) || args.containsKey(var.name))
+            ErrorHandler.Error("\33[31mVariable \33[32;4m" + var.name + "\33[0m\33[31m duplicate declaration\33[0m",
+                    var.row, var.col);
+        else
+            vars.put(var.name, var);
     }
 
     /**
@@ -128,6 +129,28 @@ public class MMethod extends MSymbol {
             if (argType.CheckType(_it.next()) != null)
                 return false;
         }
+        return true;
+    }
+
+    /**
+     * Check whether there are unused variables
+     */
+    public void CheckUse() {
+        for (MVar var : vars.values())
+            if (!var.used)
+                ErrorHandler.Warn("\33[33mVariable \33[32;4m" + var.name + "\33[0m\33[33m is not used\33[0m", var.row,
+                        var.col);
+    }
+
+    /**
+     * Check whether a local variable is initiated (args are excluded)
+     * 
+     * @param var MVar instance of a local variable
+     * @return true on initiated, false otherwise
+     */
+    public boolean CheckInit(MVar var) {
+        if (!var.inited && !args.containsValue(var))
+            return false;
         return true;
     }
 
