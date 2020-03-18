@@ -1,15 +1,6 @@
-/*
- * @Author       : Can Su
- * @Date         : 2020-03-07 15:29:28
- * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-18 17:12:34
- * @Description  : Main class for type check
- * @FilePath     : \Compiler\minijava\TypeCheck.java
- */
-
 package minijava;
 
-import minijava.error.*;
+import utils.*;
 import minijava.symbol.*;
 import minijava.syntaxtree.*;
 import minijava.visitor.*;
