@@ -1,7 +1,8 @@
-package minijava.visitor;
+package minijava.typecheck;
 
 import minijava.symbol.*;
 import minijava.syntaxtree.*;
+import minijava.visitor.GJDepthFirst;
 import utils.ErrorHandler;
 
 import java.util.Enumeration;

@@ -1,7 +1,9 @@
-package minijava.visitor;
+package minijava.typecheck;
 
 import minijava.symbol.*;
 import minijava.syntaxtree.*;
+import minijava.visitor.GJDepthFirst;
+import minijava.visitor.GJVoidDepthFirst;
 import utils.ErrorHandler;
 
 import java.util.ArrayList;

@@ -1,28 +1,28 @@
-package minijava;
+package minijava.typecheck;
 
-import utils.*;
-import minijava.symbol.*;
-import minijava.syntaxtree.*;
-import minijava.visitor.*;
-import java.io.*;
+import minijava.MiniJavaParser;
+import minijava.TokenMgrError;
+import minijava.symbol.MSymbol;
+import minijava.symbol.MTypeList;
+import minijava.syntaxtree.Node;
+import utils.ErrorHandler;
+
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 public class TypeCheck {
-	public static void Check(String file) {
-		try {
-			InputStream in = new FileInputStream(file);
-			Node root = new MiniJavaParser(in).Goal();
+    public static void Check(String file) {
+        try {
+            InputStream in = new FileInputStream(file);
+            Node root = new MiniJavaParser(in).Goal();
 
-			MSymbol typeList = new MTypeList();
-			root.accept(new BuildSymbolTableVisitor(), typeList);
-			// ErrorHandler.PrintSymbolTable();
-			root.accept(new TypeCheckVisitor(), typeList);
-			ErrorHandler.Print();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		} catch (TokenMgrError e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            MSymbol typeList = new MTypeList();
+            root.accept(new BuildSymbolTableVisitor(), typeList);
+            // ErrorHandler.PrintSymbolTable();
+            root.accept(new TypeCheckVisitor(), typeList);
+            ErrorHandler.Print();
+        } catch (TokenMgrError | Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

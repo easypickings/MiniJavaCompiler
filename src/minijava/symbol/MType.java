@@ -1,12 +1,3 @@
-/*
- * @Author       : Can Su
- * @Date         : 2020-03-04 12:45:10
- * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-06 15:12:26
- * @Description  : Abstract class for types
- * @FilePath     : \Compiler\minijava\symbol\MType.java
- */
-
 package minijava.symbol;
 
 /**
@@ -25,9 +16,14 @@ public abstract class MType extends MSymbol {
         super(_name, _row, _col);
     }
 
+    public int Size() {
+        /* the size of a type is always 4 (either as a value or a pointer) */
+        return 4;
+    }
+
     /**
      * Check if a given MType instance matches this (can assign to this)
-     * 
+     *
      * @param type instance of MType
      * @return null on success, error message on fail
      */

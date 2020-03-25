@@ -1,41 +1,45 @@
-/*
- * @Author       : Can Su
- * @Date         : 2020-03-04 16:09:12
- * @LastEditors  : Can Su
- * @LastEditTime : 2020-03-09 17:54:58
- * @Description  : Container of all MType instances
- * @FilePath     : \Compiler\minijava\symbol\MTypeList.java
- */
-
 package minijava.symbol;
 
-import minijava.error.*;
-import java.util.*;
+import utils.ErrorHandler;
+
+import java.util.HashMap;
 
 /**
  * Container of all MType instances
  */
 public class MTypeList extends MSymbol {
 
-    /** Built-in type: Array */
+    /**
+     * Built-in type: Array
+     */
     protected static MType Array = new MArray();
-    /** Built-in type: Boolean */
+    /**
+     * Built-in type: Boolean
+     */
     protected static MType Boolean = new MBoolean();
-    /** Built-in type: Int */
+    /**
+     * Built-in type: Int
+     */
     protected static MType Int = new MInt();
-    /** Built-in type: Undefined */
+    /**
+     * Built-in type: Undefined
+     */
     protected static MType Undef = new MUndef();
-    /** User-declared classes */
-    protected static HashMap<String, MType> Classes = new HashMap<String, MType>();
+    /**
+     * User-declared classes
+     */
+    protected static HashMap<String, MType> Classes = new HashMap<>();
 
     /**
      * Add a user-declared class to Classes
-     * 
+     *
      * @param type instance of MClass
      */
     public static void AddClass(MClass type) {
         if (Classes.containsKey(type.name))
-            ErrorHandler.Error("\33[31mClass \33[33;4m" + type.name + "\33[0m\33[31m duplicate declaration\33[0m", type.row, type.col);
+            ErrorHandler.Error("\33[31mClass \33[33;4m" + type.name
+                            + "\33[0m\33[31m duplicate declaration\33[0m",
+                    type.row, type.col);
         else Classes.put(type.name, type);
     }
 
@@ -48,22 +52,22 @@ public class MTypeList extends MSymbol {
             case "int":
                 return Int;
             default:
-                if (Classes.containsKey(type))
-                    return Classes.get(type);
-                else
-                    return Undef;
+                if (Classes.containsKey(type)) return Classes.get(type);
+                else return Undef;
         }
 
     }
 
     /**
      * Check whether a type is defined
+     *
      * @param type name of a type
      * @return null on defined, error message on undefined
      */
     public static String CheckDef(String type) {
         if (getType(type) == Undef)
-            return "\33[31mType \33[33;4m" + type + "\33[0m\33[31m undefined\33[0m";
+            return "\33[31mType \33[33;4m" + type
+                    + "\33[0m\33[31m undefined\33[0m";
         return null;
     }
 
@@ -79,11 +83,8 @@ public class MTypeList extends MSymbol {
         return Int;
     }
 
-    public static MType Undef() {
-        return Undef;
-    }
-
-    public static HashMap<String, MType> Classes() {
-        return Classes;
+    public static void Print() {
+        System.out.println();
+        for (MType node : Classes.values()) ((MClass) node).Print();
     }
 }
