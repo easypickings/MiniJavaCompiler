@@ -1,9 +1,26 @@
 @echo off
 echo Start
 
+<<<<<<< HEAD
 for %%G in (hw2-testcases\priv\*.java) do (
   echo ---- Run %%~nG ----
   java -jar ..\out\artifacts\Compiler_jar\Compiler.jar %%~fG
+=======
+REM for %%t in (hw2-test\Public\*.java) do (
+REM   echo [42;30m------------ Run %%~nt ------------[0m
+REM   java -jar ../out/artifacts/Compiler_jar/Compiler.jar %%t
+REM   echo.
+REM )
+
+
+for %%t in (hw3-test\Private\*.java) do (
+  echo [42;30m------------ Run %%~nt ------------[0m
+  java -jar ../out/artifacts/Compiler_jar/Compiler.jar %%t
+  echo [42;30m---------- Spiglet %%~nt ----------[0m
+  java -jar ../tools/spp.jar < %%~pnt.spg
+  java -jar ../tools/pgi.jar < %%~pnt.spg > %%~pnt.txt
+  fc %%~pnt.out %%~pnt.txt
+>>>>>>> 9c71cfa... feat(src/spiglet/*): implement register allocation
   echo.
 )
 

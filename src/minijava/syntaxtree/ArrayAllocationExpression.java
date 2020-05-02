@@ -4,7 +4,10 @@
 
 package minijava.syntaxtree;
 
-import minijava.visitor.*;
+import minijava.visitor.GJNoArguVisitor;
+import minijava.visitor.GJVisitor;
+import minijava.visitor.GJVoidVisitor;
+import minijava.visitor.Visitor;
 
 /**
  * Grammar production:
@@ -15,43 +18,51 @@ import minijava.visitor.*;
  * f4 -> "]"
  */
 public class ArrayAllocationExpression implements Node {
-   /**
-    *
-    */
-   private static final long serialVersionUID = 1L;
-   public NodeToken f0;
-   public NodeToken f1;
-   public NodeToken f2;
-   public Expression f3;
-   public NodeToken f4;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    public NodeToken f0;
+    public NodeToken f1;
+    public NodeToken f2;
+    public Expression f3;
+    public NodeToken f4;
 
-   public ArrayAllocationExpression(NodeToken n0, NodeToken n1, NodeToken n2, Expression n3, NodeToken n4) {
-      f0 = n0;
-      f1 = n1;
-      f2 = n2;
-      f3 = n3;
-      f4 = n4;
-   }
+    public ArrayAllocationExpression(NodeToken n0, NodeToken n1, NodeToken n2
+            , Expression n3, NodeToken n4) {
+        f0 = n0;
+        f1 = n1;
+        f2 = n2;
+        f3 = n3;
+        f4 = n4;
+    }
 
-   public ArrayAllocationExpression(Expression n0) {
-      f0 = new NodeToken("new");
-      f1 = new NodeToken("int");
-      f2 = new NodeToken("[");
-      f3 = n0;
-      f4 = new NodeToken("]");
-   }
+    public ArrayAllocationExpression(Expression n0) {
+        f0 = new NodeToken("new");
+        f1 = new NodeToken("int");
+        f2 = new NodeToken("[");
+        f3 = n0;
+        f4 = new NodeToken("]");
+    }
 
-   public void accept(Visitor v) {
-      v.visit(this);
-   }
-   public <R,A> R accept(GJVisitor<R,A> v, A argu) {
-      return v.visit(this,argu);
-   }
-   public <R> R accept(GJNoArguVisitor<R> v) {
-      return v.visit(this);
-   }
-   public <A> void accept(GJVoidVisitor<A> v, A argu) {
-      v.visit(this,argu);
-   }
+    @Override
+    public void accept(Visitor v) {
+        v.visit(this);
+    }
+
+    @Override
+    public <R, A> R accept(GJVisitor<R, A> v, A argu) {
+        return v.visit(this, argu);
+    }
+
+    @Override
+    public <R> R accept(GJNoArguVisitor<R> v) {
+        return v.visit(this);
+    }
+
+    @Override
+    public <A> void accept(GJVoidVisitor<A> v, A argu) {
+        v.visit(this, argu);
+    }
 }
 

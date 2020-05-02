@@ -4,7 +4,10 @@
 
 package minijava.syntaxtree;
 
-import minijava.visitor.*;
+import minijava.visitor.GJNoArguVisitor;
+import minijava.visitor.GJVisitor;
+import minijava.visitor.GJVoidVisitor;
+import minijava.visitor.Visitor;
 
 /**
  * Grammar production:
@@ -12,34 +15,41 @@ import minijava.visitor.*;
  * f1 -> Expression()
  */
 public class NotExpression implements Node {
-   /**
-    *
-    */
-   private static final long serialVersionUID = 1L;
-   public NodeToken f0;
-   public Expression f1;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+    public NodeToken f0;
+    public Expression f1;
 
-   public NotExpression(NodeToken n0, Expression n1) {
-      f0 = n0;
-      f1 = n1;
-   }
+    public NotExpression(NodeToken n0, Expression n1) {
+        f0 = n0;
+        f1 = n1;
+    }
 
-   public NotExpression(Expression n0) {
-      f0 = new NodeToken("!");
-      f1 = n0;
-   }
+    public NotExpression(Expression n0) {
+        f0 = new NodeToken("!");
+        f1 = n0;
+    }
 
-   public void accept(Visitor v) {
-      v.visit(this);
-   }
-   public <R,A> R accept(GJVisitor<R,A> v, A argu) {
-      return v.visit(this,argu);
-   }
-   public <R> R accept(GJNoArguVisitor<R> v) {
-      return v.visit(this);
-   }
-   public <A> void accept(GJVoidVisitor<A> v, A argu) {
-      v.visit(this,argu);
-   }
+    @Override
+    public void accept(Visitor v) {
+        v.visit(this);
+    }
+
+    @Override
+    public <R, A> R accept(GJVisitor<R, A> v, A argu) {
+        return v.visit(this, argu);
+    }
+
+    @Override
+    public <R> R accept(GJNoArguVisitor<R> v) {
+        return v.visit(this);
+    }
+
+    @Override
+    public <A> void accept(GJVoidVisitor<A> v, A argu) {
+        v.visit(this, argu);
+    }
 }
 
