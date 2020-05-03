@@ -4,6 +4,7 @@
 .idea
 out/
 src/META-INF
+test/
 *.iml
 
 # Compiled class file

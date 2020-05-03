@@ -62,7 +62,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
         n.f1.accept(this, graph);
         graph.BuildControlFlow();
         graph.AllocateReg();
-
+        graph.Kanga();
         n.f3.accept(this, null);
     }
 
@@ -90,7 +90,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
         n.f4.accept(this, graph);
         graph.BuildControlFlow();
         graph.AllocateReg();
-
+        graph.Kanga();
     }
 
     /**
@@ -105,7 +105,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
      */
     @Override
     public void visit(Stmt n, Graph argu) {
-        cur = new Statement(); // new Statement
+        cur = new Statement(n); // new Statement
         n.f0.accept(this, argu);
     }
 
@@ -114,7 +114,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
      */
     @Override
     public void visit(NoOpStmt n, Graph argu) {
-        argu.addStatement(cur);
+        argu.addStatement(cur, false);
     }
 
     /**
@@ -122,7 +122,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
      */
     @Override
     public void visit(ErrorStmt n, Graph argu) {
-        argu.addStatement(cur);
+        argu.addStatement(cur, true);
         argu.setJump("-1", true); // label "-1" denotes exit block
     }
 
@@ -134,7 +134,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
     @Override
     public void visit(CJumpStmt n, Graph argu) {
         cur.addUse(Integer.parseInt(n.f1.f1.f0.tokenImage)); // Temp is used
-        argu.addStatement(cur);
+        argu.addStatement(cur, false);
         argu.setJump(n.f2.f0.tokenImage, false); // don't unlink pre and cur
     }
 
@@ -144,7 +144,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
      */
     @Override
     public void visit(JumpStmt n, Graph argu) {
-        argu.addStatement(cur);
+        argu.addStatement(cur, false);
         argu.setJump(n.f1.f0.tokenImage, true);
     }
 
@@ -158,7 +158,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
     public void visit(HStoreStmt n, Graph argu) {
         cur.addUse(Integer.parseInt(n.f1.f1.f0.tokenImage)); // Temp is used
         cur.addUse(Integer.parseInt(n.f3.f1.f0.tokenImage)); // Temp is used
-        argu.addStatement(cur);
+        argu.addStatement(cur, true);
     }
 
     /**
@@ -171,7 +171,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
     public void visit(HLoadStmt n, Graph argu) {
         cur.addUse(Integer.parseInt(n.f2.f1.f0.tokenImage)); // Temp is used
         cur.addDef(Integer.parseInt(n.f1.f1.f0.tokenImage)); // Temp is defined
-        argu.addStatement(cur);
+        argu.addStatement(cur, true);
     }
 
     /**
@@ -183,7 +183,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
     public void visit(MoveStmt n, Graph argu) {
         n.f2.accept(this, argu);
         cur.addDef(Integer.parseInt(n.f1.f1.f0.tokenImage)); // Temp is defined
-        argu.addStatement(cur);
+        argu.addStatement(cur, true);
     }
 
     /**
@@ -193,7 +193,7 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
     @Override
     public void visit(PrintStmt n, Graph argu) {
         n.f1.accept(this, argu);
-        argu.addStatement(cur);
+        argu.addStatement(cur, true);
     }
 
     /**
@@ -218,9 +218,11 @@ public class BuildGraphVisitor extends GJVoidDepthFirst<Graph> {
     public void visit(StmtExp n, Graph argu) {
         n.f1.accept(this, argu);
 
-        cur = new Statement(); // RETURN is treated as a statement
+        // RETURN is treated as a statement
+        cur = new Statement(null);
         n.f3.accept(this, argu);
-        argu.addStatement(cur);
+        argu.addStatement(cur, true);
+        argu.setRet(n.f3);
     }
 
     /**

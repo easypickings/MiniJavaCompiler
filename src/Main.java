@@ -5,6 +5,7 @@ import minijava.syntaxtree.Node;
 import minijava.typecheck.TypeCheck;
 import spiglet.spiglet2kanga.Spiglet2Kanga;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
@@ -13,7 +14,7 @@ public class Main {
         String file = args[0];
         String fileName = file.substring(0, file.lastIndexOf("."));
         String fileExt = file.substring(file.lastIndexOf("."));
-
+        boolean raw = true;
         switch (fileExt) {
             case ".java":
                 try {
@@ -24,10 +25,14 @@ public class Main {
                 } catch (TokenMgrError | Exception e) {
                     e.printStackTrace();
                 }
+                raw = false;
             case ".spg":
                 Spiglet2Kanga.Kanga(fileName);
+                if (!raw) new File(fileName + ".spg").delete();
+                raw = false;
             default:
-                return;
+                if (raw)
+                    System.err.println("Unsupported source file");
         }
 
 

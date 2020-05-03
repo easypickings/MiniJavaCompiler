@@ -1,5 +1,8 @@
 package spiglet.flow;
 
+import spiglet.spiglet2kanga.Spiglet2KangaVisitor;
+import spiglet.syntaxtree.SimpleExp;
+
 import java.util.*;
 
 import static spiglet.spiglet2kanga.KangaWriter.*;
@@ -57,13 +60,13 @@ public class Graph {
      */
     protected Map<Integer, Integer> allocTemp = new HashMap<>();
     /**
-     * TEMPs that are spilled to stack
+     * Stack slots TEMPS are spilled to
      */
-    protected Set<Integer> spillTemp = new HashSet<>();
+    protected Map<Integer, Integer> spillTemp = new HashMap<>();
     /**
-     * Registers s0-s7 allocated in the procedure
+     * Callee-save registers (s0-s7) allocated in the procedure
      */
-    protected Set<Integer> sAllocated = new HashSet<>();
+    protected List<Integer> sAllocated = new ArrayList<>();
 
     /**
      * Number of args taken by the procedure
@@ -77,6 +80,11 @@ public class Graph {
      * Maximum arguments of a call in the body of the procedure
      */
     protected int callArgs = 0;
+
+    /**
+     * Return expression
+     */
+    protected SimpleExp retExp = null;
 
     public Graph(String _name, int _args) {
         name = _name;
@@ -98,8 +106,8 @@ public class Graph {
      *
      * @param stmt statement to be add to current block
      */
-    public void addStatement(Statement stmt) {
-        cur.addStatement(stmt);
+    public void addStatement(Statement stmt, boolean valid) {
+        cur.addStatement(stmt, valid);
     }
 
     protected void LinkBlock(Block prev, Block next) {
@@ -120,7 +128,8 @@ public class Graph {
     }
 
     public void NewLabelBlock(String label) {
-        /* Only start a new block when current block contains statement(s)
+        /*
+         * Only start a new block when current block contains statement(s)
          * Otherwise may generate empty blocks, e.g.
          *
          *         JUMP L1   // start a new block b1
@@ -149,10 +158,17 @@ public class Graph {
         callArgs = Math.max(callArgs, _args);
     }
 
+    public void setRet(SimpleExp _exp) {
+        retExp = _exp;
+    }
+
     public void BuildControlFlow() {
         /* complete block linking */
         for (Map.Entry<Block, String> e : jump.entrySet())
             LinkBlock(e.getKey(), labelBlocks.get(e.getValue()));
+
+        /* remove dead block */
+        DeadBlock();
 
         /* set blocks' def and use */
         for (Block b : blocks) b.setDefUse();
@@ -162,28 +178,31 @@ public class Graph {
         LiveAnalysis();
         for (Block b : blocks) b.BuildInterference();
 
-        // TODO: remove redundant blocks and labels
-
         PreColor();
         Color();
+
+        DeadBlock();
+        DeadLabel();
 
         for (int k = s0; k <= s7; ++k)
             if (allocTemp.containsValue(k)) sAllocated.add(k);
 
-        /*          stack
-         * _______________________ 0
-         * |     extra args      |
-         * +---------------------+
-         * |callee-save registers|
-         * |  (s0-s7 allocated)  |
-         * +---------------------+
+        int offset = Math.max(args - 4, 0) + sAllocated.size();
+        spillTemp.replaceAll((k, v) -> v + offset); // add offset to spill slots
+
+        /*
+         *        stack
+         * _______________________ 0  _
+         * |     extra args      |    |
+         * +---------------------+    |
+         * |callee-save registers|  offset
+         * |  (s0-s7 allocated)  |    |
+         * +---------------------+    -
          * |    spilled temps    |
          * +---------------------+ n
          */
-        stacks = Math.max(args - 4, 0) + sAllocated.size() + spillTemp.size();
-
-
-        Print();
+        stacks = offset + spillTemp.size();
+        // Print();
     }
 
     protected void LiveAnalysis() {
@@ -256,7 +275,8 @@ public class Graph {
                 }
             }
 
-            /* NOTE: spilled nodes are pushed into the stack as well in case
+            /*
+             * NOTE: spilled nodes are pushed into the stack as well in case
              * that they can still be colored.
              *
              * e.g. Suppose  2 - 1 - 0  is about to colored with 2 registers.
@@ -272,7 +292,7 @@ public class Graph {
             stack.push(i);
 
             for (int j : interferenceGraph.get(i))
-                if (degree.containsKey(j)) // TODO: acrossCall.contains(j)?
+                if (degree.containsKey(j))
                     degree.put(j, degree.get(j) - 1);
             degree.remove(i);
         }
@@ -288,7 +308,8 @@ public class Graph {
                 if (allocTemp.containsKey(j))
                     freeReg.remove(allocTemp.get(j));
 
-            if (freeReg.isEmpty()) spillTemp.add(i); // spill the node
+            if (freeReg.isEmpty())
+                spillTemp.put(i, spillTemp.size()); // spill the node
             else allocTemp.put(i, freeReg.first());
         }
     }
@@ -340,20 +361,174 @@ public class Graph {
                 if (allocTemp.containsKey(j))
                     freeReg.remove(allocTemp.get(j));
 
-            if (freeReg.isEmpty()) spillTemp.add(i); // spill the node
+            if (freeReg.isEmpty())
+                spillTemp.put(i, spillTemp.size()); // spill the node
             else allocTemp.put(i, freeReg.first());
         }
+    }
+
+    protected void DeadBlock() {
+        /* blocks with no predecessor is dead */
+        for (Block b : blocks)
+            if (b.preBlocks.isEmpty()) {
+                for (Block s : b.sucBlocks) s.preBlocks.remove(b);
+                blocks.remove(b);
+            }
+    }
+
+    protected void DeadLabel() {
+        /*
+         * labels that are not jump targets or jump right from previous block
+         * is redundant
+         */
+        Block prev = null;
+        for (Block b : blocks) {
+            boolean redundant = true;
+            for (Block p : b.preBlocks)
+                if (p != prev) {
+                    redundant = false;
+                    break;
+                }
+            if (redundant) // will do nothing if b.label is null
+                newLabels.replace(b.label, -1);
+            prev = b;
+        }
+
+        /*
+         * labels of blocks that contain no valid statements (i.e. only
+         * NOOP/JUMP/CJUMP or dead MOVE/HLOAD statements) can be substituted by
+         * the label of successor
+         */
+        prev = null;
+        for (Block b : blocks) {
+            if (b.valid == 0 && b.sucBlocks.size() == 1) {
+                Block s = b.sucBlocks.iterator().next();
+                if (b.label != null && s.label != null) {
+                    int bLabel = newLabels.get(b.label),
+                            sLabel = newLabels.get(s.label);
+                    for (Map.Entry<String, Integer> e : newLabels.entrySet())
+                        // if current value is bLabel, replace it by sLabel
+                        newLabels.replace(e.getKey(), bLabel, sLabel);
+                    b.label = null;
+
+                    if (!b.preBlocks.contains(prev))
+                        b.statements.clear();
+                }
+            }
+            prev = b;
+        }
+    }
+
+    public void Kanga() {
+        Begin();
+
+        Spiglet2KangaVisitor kanga = new Spiglet2KangaVisitor();
+        for (Block block : blocks) block.Kanga(kanga);
+
+        if (retExp != null) // handle RETURN
+            move(v0, kanga.visit(retExp, this));
+
+        End();
+    }
+
+
+    /**
+     * Print Kanga prologue of the procedure
+     */
+    protected void Begin() {
+        emit(name + " [" + args + "][" + stacks + "][" + callArgs + "]\n", "");
+
+        /* store s* registers before using in the procedure */
+        int x = Math.max(args - 4, 0);
+        for (int i : sAllocated) astore(x++, i);
+
+        /* load live args to t0-t9/s0-s7, or spill if necessary */
+        for (int arg : entry.out) {
+            int reg = getReg(arg);
+            if (reg >= 0) // arg is allocated to a register
+                if (arg < 4) move(reg, Reg(a0 + arg));// move from a* to reg
+                else aload(reg, arg - 4); // load from stack to reg
+            else // arg is spilled
+                if (arg < 4) // store a* to stack
+                    astore(spillTemp.get(arg), a0 + arg);
+                else { // load from stack to v1, then store v1 to stack
+                    aload(v1, arg - 4);
+                    astore(spillTemp.get(arg), v1);
+                }
+        }
+    }
+
+    /**
+     * Print Kanga epilogue of the procedure
+     */
+    protected void End() {
+        /* restore s* registers from stack */
+        int x = Math.max(args - 4, 0);
+        for (int i : sAllocated) aload(i, x++);
+        emit("END\n\n", "");
+    }
+
+    /**
+     * Get the register a TEMP is allocated to. If TEMP is not allocated to a
+     * register, load it to a temporary register {@code v} (v0 or v1) first.
+     *
+     * @param temp TEMP number
+     * @param v    temporary register number
+     * @return number of the register {@code temp} is allocated to, or {@code
+     * v} if {@code temp} is not allocated to a register
+     */
+    public int getReg(int temp, int v) {
+        if (allocTemp.containsKey(temp)) return allocTemp.get(temp);
+        aload(v, spillTemp.get(temp));
+        return v;
+    }
+
+    /**
+     * Get the register a TEMP is allocated to. If TEMP is not allocated to a
+     * register, return {@code -1}.
+     *
+     * @param temp TEMP number
+     * @return number of the register {@code temp} is allocated to, or {@code
+     * -1} if {@code temp} is not allocated to a register
+     */
+    public int getReg(int temp) {
+        return allocTemp.getOrDefault(temp, -1);
+    }
+
+    /**
+     * Get the (new) label number of a label string. If the number doesn't
+     * exist (due to redundant label removal), return {@code -1}.
+     *
+     * @param label old label string
+     * @return new label number, or {@code -1} if not exist
+     */
+    public int getLabel(String label) {
+        return newLabels.getOrDefault(label, -1);
+    }
+
+    /**
+     * Get the stack slot a TEMP is spilled to. If TEMP is not spilled,
+     * return {@code -1}.
+     *
+     * @param temp TEMP number
+     * @return stack slot {@code temp} is spilled to, or {@code -1} if {@code
+     * temp} is not spilled.
+     */
+    public int getSpill(int temp) {
+        return spillTemp.getOrDefault(temp, -1);
     }
 
     protected void Print() {
         System.out.println("\n********************");
         System.out.println(name);
         for (Map.Entry<Integer, Integer> e : allocTemp.entrySet())
-            System.out.println("\tTEMP " + e.getKey() + " -> " + reg[e.getValue()]);
-        for (int i : spillTemp)
-            System.out.println("\tTEMP " + i + " spilled");
+            System.out.println("\tTEMP " + e.getKey()
+                    + " -> " + Reg(e.getValue()));
+        for (Map.Entry<Integer, Integer> e : spillTemp.entrySet())
+            System.out.println("\tTEMP " + e.getKey()
+                    + " -> stack " + e.getValue());
+        System.out.println("acrossCall: " + acrossCall);
         System.out.println("********************\n");
     }
-
 
 }

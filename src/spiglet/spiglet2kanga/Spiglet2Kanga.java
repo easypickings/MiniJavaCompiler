@@ -13,7 +13,9 @@ public class Spiglet2Kanga {
         try {
             InputStream in = new FileInputStream(name + ".spg");
             Node root = new SpigletParser(in).Goal();
+            KangaWriter.open(name + ".kg");
             root.accept(new BuildGraphVisitor(), null);
+            KangaWriter.close();
         } catch (TokenMgrError | Exception e) {
             e.printStackTrace();
         }
