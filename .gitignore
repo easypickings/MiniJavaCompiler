@@ -1,9 +1,9 @@
 # Created by .ignore support plugin (hsz.mobi)
 ### Java template
 # MiniJavaCompiler
-.idea
+.idea/
 out/
-src/META-INF
+src/META-INF/
 test/
 *.iml
 

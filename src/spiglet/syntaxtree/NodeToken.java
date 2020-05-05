@@ -70,7 +70,7 @@ public class NodeToken implements Node {
         if (specialTokens == null)
             return tokenImage;
 
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
 
         for (Enumeration<NodeToken> e = specialTokens.elements(); e.hasMoreElements(); )
             buf.append(e.nextElement().toString());

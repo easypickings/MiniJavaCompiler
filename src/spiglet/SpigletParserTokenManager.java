@@ -11,22 +11,17 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
      */
     public static final String[] jjstrLiteralImages = {
             "", null, null, null, null, null, null, null, null, "\50", "\51",
-            "\173",
-            "\175", "\133", "\135", "\56", "\114\124", "\114\105", "\107\124"
-            , "\107\105",
-            "\116\105", "\105\121", "\120\114\125\123", "\115\111\116\125\123"
-            , "\101\116\104",
-            "\117\122", "\116\117\124", "\124\111\115\105\123", "\115\101\111" +
-            "\116",
-            "\103\117\104\105", "\110\101\114\114\117\103\101\124\105", "\105" +
-            "\116\104", "\116\117\117\120",
-            "\115\117\126\105", "\103\101\114\114", "\105\122\122\117\122",
-            "\120\122\111\116\124",
-            "\102\105\107\111\116", "\122\105\124\125\122\116", "\112\125\115" +
-            "\120", "\103\112\125\115\120",
-            "\110\123\124\117\122\105", "\110\114\117\101\104", "\115\105\115"
-            , "\124\105\115\120", "\101\122\107",
-            null, null, null, null,};
+            "\173", "\175", "\133", "\135", "\56", "\114\124", "\114\105",
+            "\107\124", "\107\105", "\116\105", "\105\121", "\120\114\125\123",
+            "\115\111\116\125\123", "\101\116\104", "\117\122", "\116\117\124",
+            "\124\111\115\105\123", "\115\101\111\116", "\103\117\104\105",
+            "\110\101\114\114\117\103\101\124\105", "\105\116\104",
+            "\116\117\117\120", "\115\117\126\105", "\103\101\114\114",
+            "\105\122\122\117\122", "\120\122\111\116\124",
+            "\102\105\107\111\116", "\122\105\124\125\122\116",
+            "\112\125\115\120", "\103\112\125\115\120",
+            "\110\123\124\117\122\105", "\110\114\117\101\104", "\115\105\115",
+            "\124\105\115\120", "\101\122\107", null, null, null, null,};
     /**
      * Lexer state names.
      */
@@ -199,7 +194,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         jjmatchedKind = kind;
         jjmatchedPos = pos;
         try {
-            curChar = input_stream.readChar();
+            curChar = JavaCharStream.readChar();
         } catch (java.io.IOException e) { return pos + 1; }
         return jjMoveNfa_0(state, pos + 1);
     }
@@ -255,7 +250,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
 
     static private int jjMoveStringLiteralDfa1_0(long active0) {
         try {
-            curChar = input_stream.readChar();
+            curChar = JavaCharStream.readChar();
         } catch (java.io.IOException e) {
             jjStopStringLiteralDfa_0(0, active0);
             return 1;
@@ -309,7 +304,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         if (((active0 &= old0)) == 0L)
             return jjStartNfa_0(0, old0);
         try {
-            curChar = input_stream.readChar();
+            curChar = JavaCharStream.readChar();
         } catch (java.io.IOException e) {
             jjStopStringLiteralDfa_0(1, active0);
             return 2;
@@ -357,7 +352,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         if (((active0 &= old0)) == 0L)
             return jjStartNfa_0(1, old0);
         try {
-            curChar = input_stream.readChar();
+            curChar = JavaCharStream.readChar();
         } catch (java.io.IOException e) {
             jjStopStringLiteralDfa_0(2, active0);
             return 3;
@@ -409,7 +404,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         if (((active0 &= old0)) == 0L)
             return jjStartNfa_0(2, old0);
         try {
-            curChar = input_stream.readChar();
+            curChar = JavaCharStream.readChar();
         } catch (java.io.IOException e) {
             jjStopStringLiteralDfa_0(3, active0);
             return 4;
@@ -453,7 +448,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         if (((active0 &= old0)) == 0L)
             return jjStartNfa_0(3, old0);
         try {
-            curChar = input_stream.readChar();
+            curChar = JavaCharStream.readChar();
         } catch (java.io.IOException e) {
             jjStopStringLiteralDfa_0(4, active0);
             return 5;
@@ -479,7 +474,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         if (((active0 &= old0)) == 0L)
             return jjStartNfa_0(4, old0);
         try {
-            curChar = input_stream.readChar();
+            curChar = JavaCharStream.readChar();
         } catch (java.io.IOException e) {
             jjStopStringLiteralDfa_0(5, active0);
             return 6;
@@ -497,7 +492,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         if (((active0 &= old0)) == 0L)
             return jjStartNfa_0(5, old0);
         try {
-            curChar = input_stream.readChar();
+            curChar = JavaCharStream.readChar();
         } catch (java.io.IOException e) {
             jjStopStringLiteralDfa_0(6, active0);
             return 7;
@@ -515,7 +510,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         if (((active0 &= old0)) == 0L)
             return jjStartNfa_0(6, old0);
         try {
-            curChar = input_stream.readChar();
+            curChar = JavaCharStream.readChar();
         } catch (java.io.IOException e) {
             jjStopStringLiteralDfa_0(7, active0);
             return 8;
@@ -695,7 +690,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
                         break;
                 } while (i != startsAt);
             } else {
-                int hiByte = (int) (curChar >> 8);
+                int hiByte = curChar >> 8;
                 int i1 = hiByte >> 6;
                 long l1 = 1L << (hiByte & 077);
                 int i2 = (curChar & 0xff) >> 6;
@@ -745,7 +740,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
                     startsAt)))
                 return curPos;
             try {
-                curChar = input_stream.readChar();
+                curChar = JavaCharStream.readChar();
             } catch (java.io.IOException e) { return curPos; }
         }
     }
@@ -764,9 +759,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
             case 61:
                 return ((jjbitVec6[i2] & l2) != 0L);
             default:
-                if ((jjbitVec0[i1] & l1) != 0L)
-                    return true;
-                return false;
+                return (jjbitVec0[i1] & l1) != 0L;
         }
     }
 
@@ -776,9 +769,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
             case 0:
                 return ((jjbitVec8[i2] & l2) != 0L);
             default:
-                if ((jjbitVec7[i1] & l1) != 0L)
-                    return true;
-                return false;
+                return (jjbitVec7[i1] & l1) != 0L;
         }
     }
 
@@ -827,11 +818,11 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         int beginColumn;
         int endColumn;
         String im = jjstrLiteralImages[jjmatchedKind];
-        tokenImage = (im == null) ? input_stream.GetImage() : im;
-        beginLine = input_stream.getBeginLine();
-        beginColumn = input_stream.getBeginColumn();
-        endLine = input_stream.getEndLine();
-        endColumn = input_stream.getEndColumn();
+        tokenImage = (im == null) ? JavaCharStream.GetImage() : im;
+        beginLine = JavaCharStream.getBeginLine();
+        beginColumn = JavaCharStream.getBeginColumn();
+        endLine = JavaCharStream.getEndLine();
+        endColumn = JavaCharStream.getEndColumn();
         t = Token.newToken(jjmatchedKind, tokenImage);
 
         t.beginLine = beginLine;
@@ -854,7 +845,7 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
         EOFLoop:
         for (; ; ) {
             try {
-                curChar = input_stream.BeginToken();
+                curChar = JavaCharStream.BeginToken();
             } catch (java.io.IOException e) {
                 jjmatchedKind = 0;
                 matchedToken = jjFillToken();
@@ -863,16 +854,16 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
             }
 
             try {
-                input_stream.backup(0);
+                JavaCharStream.backup(0);
                 while (curChar <= 32 && (0x100003600L & (1L << curChar)) != 0L)
-                    curChar = input_stream.BeginToken();
+                    curChar = JavaCharStream.BeginToken();
             } catch (java.io.IOException e1) { continue EOFLoop; }
             jjmatchedKind = 0x7fffffff;
             jjmatchedPos = 0;
             curPos = jjMoveStringLiteralDfa0_0();
             if (jjmatchedKind != 0x7fffffff) {
                 if (jjmatchedPos + 1 < curPos)
-                    input_stream.backup(curPos - jjmatchedPos - 1);
+                    JavaCharStream.backup(curPos - jjmatchedPos - 1);
                 if ((jjtoToken[jjmatchedKind >> 6] & (1L << (jjmatchedKind & 077))) != 0L) {
                     matchedToken = jjFillToken();
                     matchedToken.specialToken = specialToken;
@@ -890,16 +881,16 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
                     continue EOFLoop;
                 }
             }
-            int error_line = input_stream.getEndLine();
-            int error_column = input_stream.getEndColumn();
+            int error_line = JavaCharStream.getEndLine();
+            int error_column = JavaCharStream.getEndColumn();
             String error_after = null;
             boolean EOFSeen = false;
             try {
-                input_stream.readChar();
-                input_stream.backup(1);
+                JavaCharStream.readChar();
+                JavaCharStream.backup(1);
             } catch (java.io.IOException e1) {
                 EOFSeen = true;
-                error_after = curPos <= 1 ? "" : input_stream.GetImage();
+                error_after = curPos <= 1 ? "" : JavaCharStream.GetImage();
                 if (curChar == '\n' || curChar == '\r') {
                     error_line++;
                     error_column = 0;
@@ -907,8 +898,8 @@ public class SpigletParserTokenManager implements SpigletParserConstants {
                     error_column++;
             }
             if (!EOFSeen) {
-                input_stream.backup(1);
-                error_after = curPos <= 1 ? "" : input_stream.GetImage();
+                JavaCharStream.backup(1);
+                error_after = curPos <= 1 ? "" : JavaCharStream.GetImage();
             }
             throw new TokenMgrError(EOFSeen, curLexState, error_line,
                     error_column, error_after, curChar,

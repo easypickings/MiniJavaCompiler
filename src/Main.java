@@ -1,3 +1,4 @@
+import kanga.kanga2mips.Kanga2MIPS;
 import minijava.MiniJavaParser;
 import minijava.TokenMgrError;
 import minijava.minijava2piglet.MiniJava2Piglet;
@@ -30,11 +31,12 @@ public class Main {
                 Spiglet2Kanga.Kanga(fileName);
                 if (!raw) new File(fileName + ".spg").delete();
                 raw = false;
+            case ".kg":
+                Kanga2MIPS.MIPS(fileName);
+                if (!raw) new File(fileName + ".kg").delete();
+                break;
             default:
-                if (raw)
-                    System.err.println("Unsupported source file");
+                System.err.println("Unsupported source file");
         }
-
-
     }
 }
