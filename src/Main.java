@@ -33,7 +33,7 @@ public class Main {
                 raw = false;
             case ".kg":
                 Kanga2MIPS.MIPS(fileName);
-                if (!raw) new File(fileName + ".kg").delete();
+//                if (!raw) new File(fileName + ".kg").delete();
                 break;
             default:
                 System.err.println("Unsupported source file");

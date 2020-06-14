@@ -122,6 +122,7 @@ public class Block {
     protected void Print() {
         System.out.println("\n********************");
         System.out.println("statements: " + statements.size());
+        System.out.println("valid: " + valid);
         System.out.println("in: " + in);
         System.out.println("out: " + out);
         System.out.println("def: " + def);

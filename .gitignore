@@ -4,7 +4,7 @@
 .idea/
 out/
 src/META-INF/
-test/
+#test/
 *.iml
 
 # Compiled class file
@@ -20,7 +20,7 @@ test/
 .mtj.tmp/
 
 # Package Files #
-*.jar
+#*.jar
 *.war
 *.nar
 *.ear

@@ -319,7 +319,9 @@ public class Graph {
         for (Map.Entry<Integer, Set<Integer>> e :
                 interferenceGraph.entrySet()) {
             int i = e.getKey();
-            if (!allocTemp.containsKey(i)) // ignore pre colored nodes
+
+            // ignore pre colored nodes
+            if (!allocTemp.containsKey(i) && !spillTemp.containsKey(i))
                 degree.put(i, e.getValue().size());
         }
 
